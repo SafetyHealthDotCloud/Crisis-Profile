@@ -1,0 +1,71 @@
+<!--
+ * Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License, Version 2.0 (the "License").
+ * You may not use this file except in compliance with the License. A copy of
+ * the License is located at
+ *
+ * http://aws.amazon.com/apache2.0/
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+-->
+
+<!--
+
+// ABOUT THIS BROWSER SAMPLE: This sample is part of the SDK for JavaScript Developer Guide topic at
+// https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/getting-started-browser.html
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Emergency.help: Moving fast to protect people and property</title>
+    <style>body {font-family:sans-serif;} h1 {font-size:2em; color:red} h1 span {font-size:.75em; color:gray;}</style>
+  </head>
+
+  <body>
+    <h1><img src="/static/911.png"> Emergency<span>.help: Moving fast to save lives and property</span></h1>
+    <div id="textToSynth">
+      <button class="btn default">Start my shift</button>
+    </div>
+    <audio id="audioPlayback" controls style="display:none">
+      <source id="audioSource" type="audio/mp3" src="">
+    </audio>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.410.0.min.js"></script>
+    <script type="text/javascript">
+
+        // Initialize the Amazon Cognito credentials provider
+        AWS.config.region = 'us-west-2'; 
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({IdentityPoolId: "{{ polly_api_key }}"});
+        
+        // Function invoked by button click
+        function speakText() {
+            // Create the JSON parameters for getSynthesizeSpeechUrl
+            var speechParams = {
+                OutputFormat: "mp3",
+                SampleRate: "16000",
+                Text: "New incident. DV in progress at 1778 56TH AVE SOUTHWEST. Are you responding to it?",
+                TextType: "text",
+                VoiceId: "Matthew"
+            };
+            // Create the Polly service object and presigner object
+            var polly = new AWS.Polly({apiVersion: '2016-06-10'});
+            var signer = new AWS.Polly.Presigner(speechParams, polly)
+        
+            // Create presigned URL of synthesized speech file
+            signer.getSynthesizeSpeechUrl(speechParams, function(error, url) {
+            if (error) {
+            } else {
+                document.getElementById('audioSource').src = url;
+                document.getElementById('audioPlayback').load();
+                document.getElementById('audioPlayback').play();
+            }
+          });
+        }
+
+        setTimeout(function(){speakText()},5000)
+    </script>
+  </body>
+</html>
