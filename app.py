@@ -82,5 +82,14 @@ def first_responder_home():
         google_maps_api_key=os.getenv('GOOGLE_MAPS_API_KEY')
     )
 
+@app.route("/", methods=["GET"])
+def first_responder_home():
+    return render_template(
+        "index.html",
+        polly_api_key=os.getenv('POLLY_API_KEY'),
+        google_maps_api_key=os.getenv('GOOGLE_MAPS_API_KEY')
+    )
+
+
 if __name__ == "__main__":
     app.run(port=9000, debug=True)
