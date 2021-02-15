@@ -23,7 +23,15 @@ migrate = Migrate(app, db)
 from sqlalchemy.dialects.postgresql import UUID, JSON
 import uuid
 
+class User(db.Model):
+    __tablename__ = 'users'
 
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True)
+    email_address = db.Column(db.String(), unique=True)
+    emailed_verification_code = db.Column(db.String(), nullable=True)
+    datetime_verification_code_created = db.Column(db.DateTime, nullable = False)
+    is_professional = db.Column(db.Boolean(), default=False)
+    request_id = db.Column(db.String(), db.ForeignKey('person.id'), nullable=True)
 
 class Person(db.Model):
     __tablename__ = 'people'
@@ -81,6 +89,33 @@ def first_responder_home():
         polly_api_key=os.getenv('POLLY_API_KEY'),
         google_maps_api_key=os.getenv('GOOGLE_MAPS_API_KEY')
     )
+
+
+
+def create_random_string():
+    letters = string.ascii_lowercase
+    return "".join([random.choice(letters) for i in range(10)])
+
+@app.route("/send_login_email", methods=["POST"])
+def send_login_email():
+    verification_token = create_random_string()
+    print('email ', request.form)
+    email = requests.post(
+        "https://api.mailgun.net/v3/%s/messages" % (os.getenv("API_EMAIL_DOMAIN_NAME")),
+        auth=("api", "%s" % (os.getenv("MAILGUN_API_KEY"))),
+        data={
+            "from": "Emergency.help <no-reply@%s>"
+            % (os.getenv("API_EMAIL_DOMAIN_NAME")),
+            "to": ["%s" % (request.form.get('email'))],
+            "subject": "Login code for Emergency.help",
+            "text": 'Hi! This is a login email for Emergency.help. Enter the code: %s on Emergency.help'
+            % (
+                verification_token,
+            ),
+        },
+    ).text
+    print('email status', email)
+    return jsonify("email sent")
 
 @app.route("/", methods=["GET"])
 def home():

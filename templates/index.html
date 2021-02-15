@@ -11,6 +11,28 @@
   <script src="https://unpkg.com/vue@next"></script>
     <style>body {font-family:sans-serif;} h1 {border-bottom:1px solid red; padding:10px; font-size:1.25em; color:red} h1 span {font-size:.75em; color:gray;}</style>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script>
+$(function() {
+
+const App = {
+  data() {
+    return {
+      sentLoginEmail: false,
+    }
+  },
+  methods: {
+    sendLoginEmail: function (event) {
+        $.post( "/send_login_email", {email: $('#login_email').val()}, function( data ) {
+app.sentLoginEmail = true;
+});
+    }  
+  },
+    delimiters: ['[[', ']]']
+}
+
+var app = Vue.createApp(App).mount('#app')
+});
+    </script>
     <style type="text/css">
       /* Always set the map height explicitly to define the size of the div
        * element that contains the map. */
@@ -38,12 +60,18 @@
     </script>
   </head>
 
-  <body>
+  <body><div id="app">
     <h1><img src="/static/911.png"> Emergency<span>.help: Moving fast to save lives and property</span></h1>
-    <form><h3>Login</h3>
+ <h3>Login</h3>
+        <div v-if="sentLoginEmail">
+
+            <strong>Your login code:</strong>
+    <input type="text" id="login_code" /><button @click="login">Login</button>
+        </div>
+        <div v-else>
     <strong>Your email (if you're a first responder use your work email address):</strong>
-    <input type="text" name="email" /><button>Login</button>
-    </form>
+    <input type="text" name="email" id="login_email" /><button @click="sendLoginEmail">Login</button>
+        </div>
     <div id="textToSynth">
       <button class="btn default">Start my shift</button>
     </div>
@@ -90,6 +118,6 @@
     <script
       src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap&libraries=&v=weekly"
       async
-    ></script>
+    ></script></div>
   </body>
 </html>
