@@ -1,28 +1,10 @@
-<!--
- * Copyright 2010-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * This file is licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License. A copy of
- * the License is located at
- *
- * http://aws.amazon.com/apache2.0/
- *
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- * CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
--->
 
-<!--
-
-// ABOUT THIS BROWSER SAMPLE: This sample is part of the SDK for JavaScript Developer Guide topic at
-// https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/getting-started-browser.html
--->
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
     <title>Emergency.help: Moving fast to protect people and property</title>
-    <style>body {font-family:sans-serif;} h1 {font-size:2em; color:red} h1 span {font-size:.75em; color:gray;}</style>
+    <style>body {font-family:sans-serif;} h1 {border-bottom:1px solid red; padding:10px; font-size:1.25em; color:red} h1 span {font-size:.75em; color:gray;}</style>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <style type="text/css">
       /* Always set the map height explicitly to define the size of the div
@@ -53,6 +35,10 @@
 
   <body>
     <h1><img src="/static/911.png"> Emergency<span>.help: Moving fast to save lives and property</span></h1>
+    <form><h3>Login</h3>
+    <strong>Your email (if you're a first responder use your work email address):</strong>
+    <input type="text" name="email" /><button>Login</button>
+    </form>
     <div id="textToSynth">
       <button class="btn default">Start my shift</button>
     </div>
