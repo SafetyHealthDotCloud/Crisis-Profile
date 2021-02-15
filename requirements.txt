@@ -1,6 +1,6 @@
 Flask
 Flask-WTF
-psycopg2
+psycopg2-binary
 Flask-SQLAlchemy
 Flask-Migrate
 Flask-Scripts

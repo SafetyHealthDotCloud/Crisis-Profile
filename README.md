@@ -1,6 +1,6 @@
 # Emergency.help
 
-The mission of Emergency.help is to save lives and secure property. Our current focus is developing CrisisProfile and automatically dispatching first responders instantly when an emergency is reported. We will provide them the data, photographs, and video they need. Our long-term vision is to provide a combined safety, security, and health platform for all taskholders. 
+The mission of Emergency.help is to save lives and secure property. Our current focus is developing CrisisProfile and automatically dispatching first responders instantly when an emergency is reported. We will provide them the data, photographs, and video they need. Our long-term vision is to provide a combined safety, security, and health platform for all stakeholders. 
 
 ## Features planed
 
