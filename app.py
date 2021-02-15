@@ -13,11 +13,7 @@ app = Flask(__name__, static_url_path="", static_folder="static")
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
-app.config["RECAPTCHA_USE_SSL"] = True
-app.config["RECAPTCHA_PUBLIC_KEY"] = os.getenv("RECAPTCHA_PUBLIC_KEY")
-app.config["RECAPTCHA_PRIVATE_KEY"] = os.getenv("RECAPTCHA_PRIVATE_KEY")
-app.config["RECAPTCHA_OPTIONS"] = {"theme": "black"}
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["MAIN_SITE_DATABASE_URL"]
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DEV_DATABASE_URL"]
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 db.app = app
