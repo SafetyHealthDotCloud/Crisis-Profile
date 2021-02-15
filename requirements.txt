@@ -3,4 +3,3 @@ Flask-WTF
 psycopg2-binary
 Flask-SQLAlchemy
 Flask-Migrate
-Flask-Scripts
