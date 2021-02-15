@@ -83,7 +83,7 @@ def first_responder_home():
     )
 
 @app.route("/", methods=["GET"])
-def first_responder_home():
+def home():
     return render_template(
         "index.html",
         polly_api_key=os.getenv('POLLY_API_KEY'),
