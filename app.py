@@ -78,7 +78,8 @@ def send_static(path):
 def first_responder_home():
     return render_template(
         "for_first_responders.html",
-        polly_api_key=os.getenv('POLLY_API_KEY')
+        polly_api_key=os.getenv('POLLY_API_KEY'),
+        google_maps_api_key=os.getenv('GOOGLE_MAPS_API_KEY')
     )
 
 if __name__ == "__main__":
