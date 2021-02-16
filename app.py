@@ -31,7 +31,7 @@ class User(db.Model):
     emailed_verification_code = db.Column(db.String(), nullable=True)
     datetime_verification_code_created = db.Column(db.DateTime, nullable = False)
     is_professional = db.Column(db.Boolean(), default=False)
-    request_id = db.Column(db.String(), db.ForeignKey('person.id'), nullable=True)
+    person_id = db.Column(db.String(), db.ForeignKey('people.id'), nullable=True)
 
 class Person(db.Model):
     __tablename__ = 'people'
