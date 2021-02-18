@@ -1,6 +1,6 @@
-# Emergency.help
+# SafetyHealth.cloud
 
-The mission of Emergency.help is to save lives and secure property. Our current focus is developing CrisisProfile and automatically dispatching first responders instantly when an emergency is reported. We will provide them the data, photographs, and video they need. Our long-term vision is to provide a combined safety, security, and health platform for all stakeholders. 
+The mission of SafetyHealth.cloud is to save lives, secure property, and help everyone to be healthy. Our current focus is developing CrisisProfile and automatically dispatching first responders instantly when an emergency is reported. We will provide them the data, photographs, and video they need. Our long-term vision is to provide a combined safety, security, and health platform for all stakeholders. 
 
 ## Features planed
 
@@ -14,7 +14,7 @@ CrisisProfile can also be used to contact people living at an address that is th
 
 ### Instant dispatching
 
-As soon as an emergency call comes in with an address we will automatically dispatch first responders and unmanned aircraft with thermal imaging to the scene. We want to integrate with existing first responder computer aided dispatch software by using an application programming language (API) or a screen scraper such as [SikuliX](http://sikulix.com/) The emergency.help app will allow citizens to select an emergency type and location on a map like ride sharing apps like Uber and Lyft.
+As soon as an emergency call comes in with an address we will automatically dispatch first responders and unmanned aircraft with thermal imaging to the scene. We want to integrate with existing first responder computer aided dispatch software by using an application programming language (API) or a screen scraper such as [SikuliX](http://sikulix.com/) The emergency.help app will allow citizens to select an emergency type and location on a map like they can with ride sharing apps such as Uber and Lyft.
 
 
 
