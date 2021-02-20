@@ -38,6 +38,22 @@ def create_random_string():
     letters = string.ascii_lowercase
     return "".join([random.choice(letters) for i in range(10)])
 
+# 
+class ApprovedWorkEmailAddressDomain(db.Model):
+    __tablename__ = 'approved_work_email_address_domains'
+
+    email_address_domain = db.Column(db.String(), primary_key=True)
+
+    def __init__(self, email_address_domain):
+        self.email_address_domain = email_address_domain
+
+class ApprovedWorkEmailAddress(db.Model):
+    __tablename__ = 'approved_work_email_addresses'
+
+    email_address = db.Column(db.String(), primary_key=True)
+
+    def __init__(self, email_address_domain):
+        self.email_address = email_address
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -49,7 +65,7 @@ class User(UserMixin, db.Model):
     is_professional = db.Column(db.Boolean(), default=False)
     person_id = db.Column(UUID(as_uuid=True), db.ForeignKey('people.id'), nullable=True)
     job_title = db.Column(db.String(), nullable=True)
-    agency = db.Column(db.String(), nullable=True)
+    organization = db.Column(db.String(), nullable=True)
     
     def __init__(self, email_address, emailed_verification_code, is_professional, person_id, job_title, agency):
         self.email_address = email_address
@@ -119,6 +135,9 @@ class Person(db.Model):
     safety_information = db.Column(db.String(), nullable=True)
     deescalation_instructions = db.Column(db.String(), nullable=True)
     documents = db.Column(JSON(), nullable=True)
+    mental_health_triggers = db.Column(JSON(), nullable=True)
+    mental_health_baseline_behavior = db.Column(JSON(), nullable=True)
+    no_contact_orders = db.Column(JSON(), nullable=True)
 
 @app.route("/static/<path:path>")
 def send_static(path):
