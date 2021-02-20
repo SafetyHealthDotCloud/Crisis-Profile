@@ -5,3 +5,4 @@ Flask-SQLAlchemy
 Flask-Migrate
 GeoAlchemy2
 Flask-Script
+flask-login

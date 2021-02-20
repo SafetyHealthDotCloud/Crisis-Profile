@@ -8,6 +8,8 @@ import hashlib
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from geoalchemy2 import Geometry
+import sqlalchemy
+import datetime
 
 app = Flask(__name__, static_url_path="", static_folder="static")
 
@@ -23,15 +25,31 @@ migrate = Migrate(app, db)
 from sqlalchemy.dialects.postgresql import UUID, JSON
 import uuid
 
+def create_random_string():
+    letters = string.ascii_lowercase
+    return "".join([random.choice(letters) for i in range(10)])
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True)
     email_address = db.Column(db.String(), unique=True)
     emailed_verification_code = db.Column(db.String(), nullable=True)
-    datetime_verification_code_created = db.Column(db.DateTime, nullable = False)
+    datetime_verification_code_created = db.Column(db.DateTime, server_default=sqlalchemy.sql.func.now())
     is_professional = db.Column(db.Boolean(), default=False)
     person_id = db.Column(UUID(as_uuid=True), db.ForeignKey('people.id'), nullable=True)
+    job_title = db.Column(db.String(), nullable=True)
+    agency = db.Column(db.String(), nullable=True)
+    
+    def __init__(self, email_address, emailed_verification_code, is_professional, person_id, job_title, agency):
+        self.email_address = email_address
+        self.emailed_verification_code = emailed_verification_code
+        self.is_professional = is_professional
+        self.person_id = person_id
+        self.job_title = job_title
+        self.agency = agency
+
 
 class Person(db.Model):
     __tablename__ = 'people'
@@ -92,23 +110,32 @@ def first_responder_home():
 
 
 
-def create_random_string():
-    letters = string.ascii_lowercase
-    return "".join([random.choice(letters) for i in range(10)])
 
 @app.route("/send_login_email", methods=["POST"])
 def send_login_email():
+    email_address = request.form['email']
     verification_token = create_random_string()
+    does_email_exist = db.session.query(User.id).filter_by(email_address=request.form['email']).scalar() is not None
+    if does_email_exist:
+        user = User.query.filter_by(email_address=email_address).first()
+        user.emailed_verification_code = verification_token
+        user.datetime_verification_code_created = datetime.datetime.utcnow()
+        db.session.commit()
+    else:
+        user = User(email_address, verification_token, None, None, None, None)
+        db.session.add(user)
+        db.session.commit()
+    print('does email exist', does_email_exist)
     print('email ', request.form)
     email = requests.post(
         "https://api.mailgun.net/v3/%s/messages" % (os.getenv("API_EMAIL_DOMAIN_NAME")),
         auth=("api", "%s" % (os.getenv("MAILGUN_API_KEY"))),
         data={
-            "from": "Emergency.help <no-reply@%s>"
+            "from": "SafetyHealth.cloud <no-reply@%s>"
             % (os.getenv("API_EMAIL_DOMAIN_NAME")),
             "to": ["%s" % (request.form.get('email'))],
-            "subject": "Login code for Emergency.help",
-            "text": 'Hi! This is a login email for Emergency.help. Enter the code: %s on Emergency.help'
+            "subject": "Login code for SafetyHealth.cloud",
+            "text": 'Hi! This is a login email for SafetyHealth.cloud. Enter the code: %s on SafetyHealth.cloud'
             % (
                 verification_token,
             ),
