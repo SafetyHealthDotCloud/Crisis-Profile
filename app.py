@@ -181,17 +181,13 @@ def login():
                         emailed_verification_code=code).first()
     if user:
         login_user(user)
-        print(current_user)
-        print(current_user.is_authenticated)
-        return jsonify(user.to_json())
+        return jsonify(user.to_json().update({'status': 200}))
     else:
         return jsonify({"status": 401,
                         "reason": "Code is not correct"})
 
 @app.route('/user_info', methods=['POST'])
 def user_info():
-    print(current_user)
-    print(current_user.is_authenticated)
     if current_user.is_authenticated:
         resp = {"result": 200,
                 "data": current_user.to_json()}
