@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>SafetyHealth.cloud: Moving fast for safety, security, and health</title>
+	<title>SafetyHealth.cloud: Moving fast for safety and and health</title>
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 	<script src="https://unpkg.com/vue@next"></script>
 	<style>
@@ -82,14 +82,14 @@
 <body>
 	<div id="app">
 		<div id="header"> <span style="float:right">[[ usersLoggedInEmail ]]</span>
-			<h1><img src="/static/911.png"> SafetyHealth<span>.cloud: Moving fast for safety, security, and health</span></h1> </div>
+			<h1><img src="/static/911.png"> SafetyHealth<span>.cloud: Moving fast for safety and health</span></h1> </div>
 		<div v-if="!loggedIn">
 			<h3>Login</h3>
 			<div v-if="sentLoginEmail"> <strong>Your login code:</strong>
 				<input type="text" id="login_code" />
 				<button @click="login">Login</button>
 			</div>
-			<div v-else> <strong>Your email (if you're a first responder use your work email address):</strong>
+			<div v-else> <strong>Your email (if you're a professional needing access for work use your work email address):</strong>
 				<input type="text" name="email" id="login_email" />
 				<button @click="sendLoginEmail">Login</button>
 			</div>

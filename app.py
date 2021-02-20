@@ -38,7 +38,9 @@ def create_random_string():
     letters = string.ascii_lowercase
     return "".join([random.choice(letters) for i in range(10)])
 
-# 
+# When someone puts in their email address
+# we compare it to list of approved work email
+# addresses and domains
 class ApprovedWorkEmailAddressDomain(db.Model):
     __tablename__ = 'approved_work_email_address_domains'
 
