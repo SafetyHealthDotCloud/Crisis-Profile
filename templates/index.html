@@ -18,13 +18,24 @@ const App = {
   data() {
     return {
       sentLoginEmail: false,
+      email: ''
     }
   },
   methods: {
     sendLoginEmail: function (event) {
-        $.post( "/send_login_email", {email: $('#login_email').val()}, function( data ) {
+      this.email = $('#login_email').val();
+      $.post( "/send_login_email", {email: $('#login_email').val()}, function( data ) {
 app.sentLoginEmail = true;
 });
+    },
+    login: function(event) {
+
+      $.post( "/login", {email_address: this.email, code: $('#login_code').val()}, function( data ) {
+console.log(JSON.stringify(data))
+});
+      $.post("/user_info", function(data){
+        console.log(JSON.stringify(data))
+      })
     }  
   },
     delimiters: ['[[', ']]']

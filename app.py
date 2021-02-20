@@ -10,6 +10,7 @@ from flask_migrate import Migrate
 from geoalchemy2 import Geometry
 import sqlalchemy
 import datetime
+import json
 
 app = Flask(__name__, static_url_path="", static_folder="static")
 
@@ -22,6 +23,14 @@ db.app = app
 db.init_app(app)
 migrate = Migrate(app, db)
 
+from flask_login import LoginManager
+from flask_login import login_user
+from flask_login import current_user
+from flask_login import UserMixin
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
 from sqlalchemy.dialects.postgresql import UUID, JSON
 import uuid
 
@@ -30,7 +39,7 @@ def create_random_string():
     return "".join([random.choice(letters) for i in range(10)])
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True)
@@ -49,6 +58,21 @@ class User(db.Model):
         self.person_id = person_id
         self.job_title = job_title
         self.agency = agency
+
+    def to_json(self):        
+        return {"email_address": self.email_address}
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):   
+        return True           
+
+    def is_anonymous(self):
+        return False          
+
+    def get_id(self):         
+        return str(self.id)    
 
 
 class Person(db.Model):
@@ -143,6 +167,38 @@ def send_login_email():
     ).text
     print('email status', email)
     return jsonify("email sent")
+
+@login_manager.user_loader
+def load_user(userid):
+    return User.query.get(userid)
+
+@app.route('/login', methods=['POST'])
+def login():
+    info = request.form
+    email_address = info['email_address']
+    code = info['code'].strip()
+    user = User.query.filter_by(email_address=email_address,
+                        emailed_verification_code=code).first()
+    if user:
+        login_user(user)
+        print(current_user)
+        print(current_user.is_authenticated)
+        return jsonify(user.to_json())
+    else:
+        return jsonify({"status": 401,
+                        "reason": "Code is not correct"})
+
+@app.route('/user_info', methods=['POST'])
+def user_info():
+    print(current_user)
+    print(current_user.is_authenticated)
+    if current_user.is_authenticated:
+        resp = {"result": 200,
+                "data": current_user.to_json()}
+    else:
+        resp = {"result": 401,
+                "data": {"message": "user no login"}}
+    return jsonify(**resp)
 
 @app.route("/", methods=["GET"])
 def home():
