@@ -41,7 +41,6 @@
 				},
 				created: function() {
 					$.post('/user_info', function(data) {
-						console.log(JSON.stringify(data))
 						if(data.result == 200) {
 							app.loggedIn = true;
 							app.usersLoggedInEmail = data.data.email_address
@@ -64,10 +63,8 @@
 							email_address: this.email,
 							code: $('#login_code').val()
 						}, function(data) {
-							console.log(JSON.stringify(data))
 						});
 						$.post("/user_info", function(data) {
-							console.log(JSON.stringify(data))
 							app.loggedIn = true;
 						})
 					}
@@ -89,7 +86,7 @@
 				<input type="text" id="login_code" />
 				<button @click="login">Login</button>
 			</div>
-			<div v-else> <strong>Your email (if you're a professional needing access for work use your work email address):</strong>
+			<div v-else> <strong>Your email (if you're a professional needing access for work then use your work email address):</strong>
 				<input type="text" name="email" id="login_email" />
 				<button @click="sendLoginEmail">Login</button>
 			</div>
