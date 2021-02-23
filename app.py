@@ -95,6 +95,8 @@ class User(UserMixin, db.Model):
             data['first_name'] = person.first_name
             data['middle_name'] = person.middle_name
             data['last_name'] = person.last_name
+            data['preferred_name'] = person.preferred_name
+            data['preferred_gender_pronouns'] = person.preferred_gender_pronouns
             data['date_of_birth'] = person.date_of_birth.strftime("%B %-d, %Y")
             data['age'] = calculate_age(person.date_of_birth.date())
             data['contacts'] = person.contacts
@@ -127,6 +129,8 @@ class Person(db.Model):
     first_name = db.Column(db.String())
     middle_name = db.Column(db.String(), nullable=True)
     last_name = db.Column(db.String())
+    preferred_name = db.Column(db.String(), nullable=True)
+    preferred_gender_pronouns = db.Column(db.String(), nullable=True)
     aliases = db.Column(JSON(), nullable=True)
     photographs = db.Column(JSON(), nullable=True)
     date_of_birth = db.Column(db.Date())
