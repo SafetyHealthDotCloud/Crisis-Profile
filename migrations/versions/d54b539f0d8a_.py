@@ -8,6 +8,7 @@ Create Date: 2021-02-20 09:42:24.272157
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+from geoalchemy2.types import Geometry
 
 # revision identifiers, used by Alembic.
 revision = 'd54b539f0d8a'
@@ -42,7 +43,7 @@ def upgrade():
     sa.Column('current_physical_living_address_zip_code', sa.String(), nullable=True),
     sa.Column('past_physical_living_addresses', postgresql.JSON(astext_type=sa.Text()), nullable=True),
     sa.Column('locations_frequent', postgresql.JSON(astext_type=sa.Text()), nullable=True),
-    sa.Column('current_gps_location', geoalchemy2.types.Geometry(geometry_type='POINT', from_text='ST_GeomFromEWKT', name='geometry'), nullable=True),
+    sa.Column('current_gps_location', Geometry(geometry_type='POINT', from_text='ST_GeomFromEWKT', name='geometry'), nullable=True),
     sa.Column('vehicles', postgresql.JSON(astext_type=sa.Text()), nullable=True),
     sa.Column('social_security_number_salt', sa.String(), nullable=True),
     sa.Column('social_security_number_hash', sa.String(), nullable=True),
