@@ -106,7 +106,7 @@ class User(UserMixin, db.Model):
             data['current_physical_living_address_city'] = person.current_physical_living_address_city
             data['current_physical_living_address_state'] = person.current_physical_living_address_state
             data['current_physical_living_address_zip_code'] = person.current_physical_living_address_zip_code
-        
+            data['coping_techniques_to_use_before_calling_for_help'] = person.coping_techniques_to_use_before_calling_for_help
         return data
 
     def is_authenticated(self):
@@ -171,6 +171,7 @@ class Person(db.Model):
     mental_health_triggers = db.Column(JSON(), nullable=True)
     mental_health_baseline_behavior = db.Column(JSON(), nullable=True)
     no_contact_orders = db.Column(JSON(), nullable=True)
+    coping_techniques_to_use_before_calling_for_help = db.Column(db.String(), nullable=True)
 
 @app.route("/static/<path:path>")
 def send_static(path):
