@@ -6,7 +6,7 @@ The mission of SafetyHealth.cloud is to save lives, secure property, and help ev
 
 ### CrisisProfile and SwattingRegistry
 
-This free world wide information system will provide emergency call takers and dispatchers, first responders, hospitals and clinics, schools, correctional facilities, friends and family, and employers the information they need to effectively respond to a person in a medical or mental health crisis. Unlike [Smart911](https://www.smart911.com/) and [RapidSOS's emergencyprofile.org](https://emergencyprofile.org) the database can be queried when there is an emergency or for crisis response planning and not just showed to 911 call takers when an associated phone number calls 911. 
+This free world wide information system will provide emergency call takers and dispatchers, first responders, hospitals and clinics, schools, correctional facilities, friends and family, and employers the information they need to effectively respond to a person in a medical or mental health crisis. Unlike [Smart911](https://www.smart911.com/) and [RapidSOS's emergencyprofile.org](https://emergencyprofile.org) the database can be queried not just for 911 callers but emergency or for crisis response planning and not just showed to 911 call takers when an associated phone number calls 911. 
 
 Our dream is that phone companies will be required to recommend to their customers that they fill out a CrisisProfile for themselves and their family members and have our app on every phone. In event say a child is lost, a be on the lookout for the child with their photo could be sent out to first responders and the public before police speak with the parents.
 
