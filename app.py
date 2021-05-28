@@ -11,6 +11,7 @@ from geoalchemy2 import Geometry
 import sqlalchemy
 import datetime
 import json
+from sqlalchemy.orm.attributes import flag_modified
 
 app = Flask(__name__, static_url_path="", static_folder="static")
 
@@ -92,6 +93,7 @@ class User(UserMixin, db.Model):
         data = {"email_address": self.email_address}
         if person_query.scalar():
             person = person_query.first()
+            data['id'] = person.id
             data['first_name'] = person.first_name
             data['middle_name'] = person.middle_name
             data['last_name'] = person.last_name
@@ -110,6 +112,7 @@ class User(UserMixin, db.Model):
             data['medications'] = person.medications
             data['safety_information'] = person.safety_information
             data['mental_health_treatment_summary'] = person.mental_health_treatment_summary 
+            data['medication_notes'] = person.medication_notes
         return data
 
     def is_authenticated(self):
@@ -176,6 +179,9 @@ class Person(db.Model):
     no_contact_orders = db.Column(JSON(), nullable=True)
     coping_techniques_to_use_before_calling_for_help = db.Column(db.String(), nullable=True)
     mental_health_treatment_summary = db.Column(db.String(), nullable=True)
+    medication_notes = db.Column(db.String(), nullable=True)
+    preferred_psychiatric_inpatient_facility = db.Column(db.String(), nullable=True)
+    pets = db.Column(JSON(), nullable=True)
     
 @app.route("/static/<path:path>")
 def send_static(path):
@@ -227,6 +233,69 @@ def send_login_email():
 @login_manager.user_loader
 def load_user(userid):
     return User.query.filter_by(id=userid).first()
+
+
+@app.route('/add_medication', methods=['POST'])
+def add_medication():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    medications = person.medications
+    if not medications:
+        medications = []
+    medications.append({'name': request.form['name'], 'tablet_size': request.form['tablet_size'], 'instructions': request.form['instructions']})
+    print('medications', list(medications))
+    person.medications = medications
+    flag_modified(person, "medications")
+    db.session.commit()
+    return jsonify(medications)
+
+@app.route('/delete_medication', methods=['POST'])
+def delete_medication():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    medications = person.medications
+    del medications[int(request.form['index'])]
+    print(medications)
+    person.medications = medications
+    flag_modified(person, "medications")
+    db.session.commit()
+    return jsonify(medications)
+
+
+@app.route('/delete_contact', methods=['POST'])
+def delete_contact():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    contacts = person.contacts
+    del contacts[int(request.form['index'])]
+    person.contacts = contacts
+    flag_modified(person, "contacts")
+    db.session.commit()
+    return jsonify(contacts)    
+
+@app.route('/add_contact', methods=['POST'])
+def add_contact():
+    print('form: ', request.form, request.method)
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    contacts = person.contacts
+    contacts.append({'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes']})
+    person.contacts = contacts
+    flag_modified(person, "contacts")
+    db.session.commit()
+    return jsonify(contacts)
+
+@app.route('/edit_contact', methods=['POST'])
+def edit_contact():
+    print('form: ', request.form, request.method)
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    contacts = person.contacts
+    contacts[int(request.form['index'])] = {'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes']}
+    person.contacts = contacts
+    flag_modified(person, "contacts")
+    db.session.commit()
+    return jsonify(contacts)    
 
 @app.route('/login', methods=['POST'])
 def login():

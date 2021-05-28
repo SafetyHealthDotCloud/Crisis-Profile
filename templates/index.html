@@ -4,7 +4,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta charset="UTF-8">
-  <title>SafetyHealth.cloud: Moving fast for safety and and health</title>
+  <title>CrisisProfile</title>
   <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/vue@next"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha512-NmLkDIU1C/C88wi324HBc+S2kLhi08PN5GDeUVVVC/BVt/9Izdsc9SVeVfA1UZbY3sHUlDSyRXhCzHfr6hmPPw==" crossorigin="anonymous" />
@@ -44,11 +44,18 @@
 		font-size: .75em;
 		color: gray;
 	}
-  strong, th, h1, h2, h3 {font-weight:bold}
-  h3 {margin:10px 0}
+  strong, th, h1, h2, h3, h4 {font-weight:bold}
+  h4 {font-style:italic}
+  h3, h4, p, pre, #toc, table {margin-bottom:10px}
   #toc {list-style-type: square;padding-left:20px}
 table {
   border-collapse:collapse;
+}
+#contacts input, #contacts textarea {
+  width:100%;
+}
+#contacts textarea {
+  height:100%
 }
   th, td {border:1px solid #000; text-align:left; padding:5px; vertical-align: top;}
 	</style>
@@ -58,6 +65,7 @@ table {
     function updateUserInfo() {
     $.post('/user_info', function(data) {
 								if(data.result == 200) {
+                  app.person_uuid = data.data.id
 									app.loggedIn = true;
 									app.usersLoggedInEmail = data.data.email_address
                   app.first_name = data.data.first_name
@@ -82,6 +90,8 @@ table {
                   app.coping_techniques_to_use_before_calling_for_help = data.data.coping_techniques_to_use_before_calling_for_help
 								  app.medications = data.data.medications
                   app.safety_information = data.data.safety_information
+                  app.mental_health_treatment_summary = data.data.mental_health_treatment_summary
+                  app.medication_notes = data.data.medication_notes
                 } else {
 									app.loggedIn = false;
 								}
@@ -100,7 +110,9 @@ table {
             date_of_birth: '',
             age: '',
             persons_phone_numbers: [],
-            contacts: []
+            contacts: [],
+            medications: [],
+            editContact: -1,
 					}
 				},
 				created: function() {
@@ -122,11 +134,68 @@ table {
 						}, function(data) {
 							updateUserInfo()
 						});
-					}
+					},
+          deleteMedication: function(index) {
+            $.post('/delete_medication', {"index": index, "person_uuid": app.person_uuid}, function(data) {
+              console.log(JSON.stringify(data))
+              app.medications = data
+            });
+          },
+          addMedication: function(event) {
+            $.post('/add_medication', {
+              "person_uuid": app.person_uuid,
+              "name": $('#add-medication-name').val(),
+              "tablet_size": $('#add-medication-tablet-size').val(),
+              "instructions": $('#add-medication-instructions').val()
+            }, function(data) {
+              console.log(JSON.stringify(data))
+              app.medications = data
+              $('#add-medication-name').val('')
+              $('#add-medication-tablet-size').val('')
+              $('#add-medication-instructions').val('')
+            })
+          },
+          deleteContact: function(index) {
+            $.post('/delete_contact', {"index": index, "person_uuid": app.person_uuid}, function(data) {
+              console.log(JSON.stringify(data))
+              app.contacts = data
+            });
+          },
+          addContact: function(event) {
+            $.post('/add_contact', {
+              "person_uuid": app.person_uuid,
+              "name": $('#add_contact_name').val(),
+              "relationship": $('#add_contact_relationship').val(),
+              "phone_number": $('#add_contact_phone_number').val(),
+              "email": $('#add_contact_email').val(),
+              "notes": $('#add_contact_notes').val()
+            }, function(data) {
+              app.contacts = data
+              $('#add_contact_name').val('')
+              $('#add_contact_relationship').val('')
+              $('#add_contact_phone_number').val('')
+              $('#add_contact_email').val('')
+              $('#add_contact_notes').val('')
+            })
+          },
+          editAContact: function(index) {
+            $.post('/edit_contact', {
+              "person_uuid": app.person_uuid,
+              "index": index,
+              "name": $('#edit-contact-name-'+index).val(),
+              "relationship": $('#edit-contact-relationship-'+index).val(),
+              "phone_number": $('#edit-contact-phone-number-'+index).val(),
+              "email": $('#edit-contact-email-'+index).val(),
+              "notes": $('#edit-contact-notes-'+index).val()
+            }, function(data){
+              app.editContact = -1;
+              app.contacts = data;
+            })
+          }
 				},
 				delimiters: ['[[', ']]']
 		}
-		var app = Vue.createApp(App).mount('#app')
+		app = Vue.createApp(App).mount('#app')
 	});
 	</script>
 </head>
@@ -134,8 +203,7 @@ table {
 <body>
 	<div id="app">
 		<div id="header"> <span style="float:right">[[ usersLoggedInEmail ]]</span>
-      <h1><img src="/static/911.png"> SafetyHealth<span>.cloud: Moving fast for safety and health</span></h1>
-    <h2>Crisis Profile: Care coordination for people in crisis</h2> </div>
+      <h1>CrisisProfile<span> Care coordination for people in crisis</span></h1>
       <div id="main">
 		<div v-if="!loggedIn">
 			<h3>Login</h3>
@@ -172,6 +240,7 @@ table {
         <li><a href="#safety-information">Safety Information</a></li>
 
         <li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling for help</a></li>
+        <li><a href="#mental-health-treatment-summary">Mental health treatment summary</a></li>
         <li><a href="#medications">Medications</a></li>
         <li><a href="#contacts">Contacts</a></li>
       </ul>
@@ -179,18 +248,61 @@ table {
       <pre>[[ safety_information ]]</pre>
       <h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling for help</h3>
       <p>[[ coping_techniques_to_use_before_calling_for_help ]]</p>
+      <h3 id="mental_health_treatment_summary">Mental health treatment summary</h3>
+      <pre>[[ mental_health_treatment_summary ]]</pre>
       <h3 id="medications">Medications</h3>
-      <table><tr><th>Name</th><th>Tablet size</th><th>Instructions</th></tr>
-      <tr v-for="medication in medications"><td>[[ medication.name ]]</td><td>[[ medication.tablet_size ]] MG</td><td>[[ medication.instructions ]]</td></tr>
+      <h4>Current medications</h4>
+      <strong>Add medication:</strong> Name: <input type="text" id="add-medication-name"> 
+      Tablet size: <input type="text" id="add-medication-tablet-size"> 
+      Instructions: <input type="text" id="add-medication-instructions"> 
+      <button @click="addMedication">Add medication</button>
+      <table><tr><th>Name</th><th>Tablet size</th><th>Instructions</th><th></th></tr>
+      <tr v-for="(medication, index) in medications"><td>[[ medication.name ]]</td><td>[[ medication.tablet_size ]] MG</td><td>[[ medication.instructions ]]</td><td><button @click="deleteMedication(index)">X</button></td></tr>
       </table>
+      <h4>Medication notes</h4>
+      <pre>[[ medication_notes ]]</pre>
       <h3 id="contacts">Contacts</h3>
-      <table>
-        <tr><th>Name</th><th>Relationship</th><th>Phone number</th><th>Email</th><th>Notes</th></tr>
-        <tr v-for="contact in contacts"><td>[[ contact.name ]]</td><td>[[ contact.relationship ]]</td>
-        <td><a v-bind:href="'tel:+1'+contact.phone_number">[[ contact.phone_number ]]</a></td>
-        <td><a v-bind:href="'mailto:'+contact.email">
-          [[ contact.email ]]</a></td>
-        <td>[[ contact.notes ]]</td>
+      <strong>Name:</strong> <input type="text" id="add_contact_name" /> 
+      <strong>Relationship:</strong> <input type="text" id="add_contact_relationship" /> 
+      <strong>Phone number:</strong> <input type="text" id="add_contact_phone_number" /> 
+      <strong>Email:</strong> <input type="text" id="add_contact_email" /> 
+      <strong>Notes:</strong> <textarea id="add_contact_notes"></textarea>
+      <button @click="addContact">Add contact</button>
+      <table id="contacts">
+        <tr><th>Name</th><th>Relationship</th><th>Phone number</th><th>Email</th><th>Notes</th><th></th></tr>
+        <tr v-for="(contact, index) in contacts">
+          <td><template v-if="index == editContact">
+            <input type="text" v-bind:id="'edit-contact-name-'+index" v-bind:value="contact.name">
+          </template>
+            <template v-else>
+              [[ contact.name ]]
+            </template></td>
+          <td>
+            <template v-if="index == editContact">
+              <input type="text" v-bind:id="'edit-contact-relationship-'+index" v-bind:value="contact.relationship">
+            </template>
+              <template v-else>
+                [[ contact.relationship ]]
+              </template>
+            </td>
+        <td>
+          <template v-if="index == editContact">
+            <input type="text" v-bind:id="'edit-contact-phone-number-'+index" v-bind:value="contact.phone_number">
+          </template>
+            <template v-else>
+          <a v-bind:href="'tel:+1'+contact.phone_number">[[ contact.phone_number ]]</a></td>
+            </template></td>
+        <td><template v-if="index == editContact">
+          <input type="text" v-bind:id="'edit-contact-email-'+index" v-bind:value="contact.email">
+        </template>
+          <template v-else>
+          <a v-bind:href="'mailto:'+contact.email">
+          [[ contact.email ]]</a></template></td>
+        <td><template v-if="index == editContact"><textarea v-bind:id="'edit-contact-notes-'+index">[[ contact.notes ]]</textarea></template><template v-else>[[ contact.notes ]]</template></td>
+        <td><template v-if="index == editContact"><button @click="editAContact(index)">Save</button>
+        </template><template v-else><button @click="editContact = index">Edit</button>
+        </template>
+          <button @click="deleteContact(index)">X</button></td>
         </tr>
         </table>
     </div>
