@@ -248,6 +248,7 @@ def edit_basic_information():
     person.current_physical_living_address_city = request.form['current_physical_living_address_city']
     person.current_physical_living_address_state = request.form['current_physical_living_address_state']
     person.current_physical_living_address_zip_code = request.form['current_physical_living_address_zip_code']
+    person.persons_phone_numbers = [{"phone_number": request.form["phone_number_0"], "type": request.form["phone_number_type_0"]}]
     above_elements = {}
     above_elements['first_name'] = person.first_name
     above_elements['middle_name'] = request.form['middle_name']
@@ -259,6 +260,8 @@ def edit_basic_information():
     above_elements['current_physical_living_address_city'] = request.form['current_physical_living_address_city']
     above_elements['current_physical_living_address_state'] = request.form['current_physical_living_address_state']
     above_elements['current_physical_living_address_zip_code'] = request.form['current_physical_living_address_zip_code']
+    above_elements['persons_phone_numbers'] = person.persons_phone_numbers
+    flag_modified(person, "persons_phone_numbers")
     db.session.commit()
     return jsonify(above_elements)
 
