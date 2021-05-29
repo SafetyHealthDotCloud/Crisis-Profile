@@ -234,6 +234,33 @@ def send_login_email():
 def load_user(userid):
     return User.query.filter_by(id=userid).first()
 
+@app.route('/edit_basic_information', methods=['POST'])
+def edit_basic_information():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.first_name = request.form['first_name']
+    person.middle_name = request.form['middle_name']
+    person.last_name = request.form['last_name']
+    person.preferred_name = request.form['preferred_name']
+    person.preferred_gender_pronouns = request.form['preferred_gender_pronouns']
+    person.current_physical_living_address_1 = request.form['current_physical_living_address_1']
+    person.current_physical_living_address_2 = request.form['current_physical_living_address_2']
+    person.current_physical_living_address_city = request.form['current_physical_living_address_city']
+    person.current_physical_living_address_state = request.form['current_physical_living_address_state']
+    person.current_physical_living_address_zip_code = request.form['current_physical_living_address_zip_code']
+    above_elements = {}
+    above_elements['first_name'] = person.first_name
+    above_elements['middle_name'] = request.form['middle_name']
+    above_elements['last_name'] = request.form['last_name']
+    above_elements['preferred_name'] = request.form['preferred_name']
+    above_elements['preferred_gender_pronouns'] = request.form['preferred_gender_pronouns']
+    above_elements['current_physical_living_address_1'] = request.form['current_physical_living_address_1']
+    above_elements['current_physical_living_address_2'] = request.form['current_physical_living_address_2']
+    above_elements['current_physical_living_address_city'] = request.form['current_physical_living_address_city']
+    above_elements['current_physical_living_address_state'] = request.form['current_physical_living_address_state']
+    above_elements['current_physical_living_address_zip_code'] = request.form['current_physical_living_address_zip_code']
+    db.session.commit()
+    return jsonify(above_elements)
 
 @app.route('/add_medication', methods=['POST'])
 def add_medication():

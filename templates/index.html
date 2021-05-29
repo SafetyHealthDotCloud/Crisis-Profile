@@ -113,6 +113,7 @@ table {
             contacts: [],
             medications: [],
             editContact: -1,
+            isEditBasicInformation: false,
 					}
 				},
 				created: function() {
@@ -135,6 +136,34 @@ table {
 							updateUserInfo()
 						});
 					},
+          editBasicInformation: function(data) {
+            $.post('/edit_basic_information', {
+              "person_uuid": app.person_uuid,
+              "first_name": $('#edit-first-name').val(),
+              "middle_name": $('#edit-middle-name').val(),
+              "last_name": $('#edit-last-name').val(),
+              "preferred_name": $('#edit-preferred-name').val(),
+              "preferred_gender_pronouns": $( "#edit-preferred-gender-pronouns option:selected" ).text(),
+              "current_physical_living_address_1": $('#edit-current-physical-living-address-1').val(),
+              "current_physical_living_address_2": $('#edit-current-physical-living-address-2').val(),
+              "current_physical_living_address_city": $('#edit-current-physical-living-address-city').val(),
+              "current_physical_living_address_state": $('#edit-current-physical-living-address-state').val(),
+              "current_physical_living_address_zip_code": $('#edit-current-physical-living-address-zip-code').val(),
+            }, function(data) {
+              console.log(JSON.stringify(data))
+              app.isEditBasicInformation = false
+              app.first_name = data.first_name
+              app.middle_name = data.middle_name
+              app.last_name = data.last_name
+              app.preferred_name = data.preferred_name
+              app.preferred_gender_pronouns = data.preferred_gender_pronouns
+              app.current_physical_living_address_1 = data.current_physical_living_address_1
+              app.current_physical_living_address_2 = data.current_physical_living_address_2
+              app.current_physical_living_address_city = data.current_physical_living_address_city
+              app.current_physical_living_address_state = data.current_physical_living_address_state
+              app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
+            })
+          },
           deleteMedication: function(index) {
             $.post('/delete_medication', {"index": index, "person_uuid": app.person_uuid}, function(data) {
               console.log(JSON.stringify(data))
@@ -217,23 +246,61 @@ table {
 			</div>
     </div>
     <div v-else>
-      <strong>First name:</strong> [[ first_name ]]
-      <strong>Middle name:</strong> [[ middle_name ]]
-      <strong>Last name:</strong> [[ last_name ]]
-      <strong>Date of birth:</strong> [[ date_of_birth ]]
-      <strong>Age:</strong> [[ age ]]<br/>
-      <strong>Preferred name:</strong> [[ preferred_name ]]
-      <strong>Preferred gender pronouns:</strong> [[ preferred_gender_pronouns ]]
-      <br/>
-<strong>Current physical living address:</strong> <a target="_blank" v-bind:href="'http://maps.google.com/maps?q='+current_physical_living_address_1+' '+current_physical_living_address_2+' '+current_physical_living_address_city+' '+current_physical_living_address_state+' '+current_physical_living_address_zip_code">
-[[ current_physical_living_address_1 ]],
-<span v-if="current_physical_living_address_2">[[ current_physical_living_address_2 ]], </span>[[ current_physical_living_address_city ]] 
- [[ current_physical_living_address_state ]],
- [[ current_physical_living_address_zip_code ]]</a>
- <br/>
- <strong>Phone number(s):</strong> <span v-for="phone_number in persons_phone_numbers">
-        <a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
-      </span>
+      <template v-if="isEditBasicInformation">
+        <button @click="editBasicInformation()">Save basic information</button><br/>
+        <strong>First name:</strong> <input type="text" id="edit-first-name" v-bind:value="first_name"> 
+        <strong>Middle name:</strong> <input type="text"  id="edit-middle-name" v-bind:value="middle_name"> 
+        <strong>Last name:</strong> <input type="text"  id="edit-last-name"  v-bind:value="last_name"> 
+        <strong>Date of birth:</strong> [[ date_of_birth ]]
+        <strong>Age:</strong> [[ age ]]<br/>
+        <strong>Preferred name:</strong> <input type="text"  id="edit-preferred-name"  v-bind:value="preferred_name"> 
+        <strong>Preferred gender pronouns:</strong> 
+        <select  id="edit-preferred-gender-pronouns">
+          
+          <option :selected="preferred_gender_pronouns == 'she/her/hers'" value="she/her/hers">she/her/hers</option>
+          <option :selected="preferred_gender_pronouns == 'they/them/their'" value="they/them/their">they/them/their</option>
+          <option :selected="preferred_gender_pronouns == 'he/him/his'" value="he/him/his">he/him/his</option>
+        </select>
+        <br/>
+        <strong>Current physical living address:</strong> <br/>
+        <strong>Address line 1:</strong> 
+        <input type="text"  id="edit-current-physical-living-address-1"  v-bind:value="current_physical_living_address_1"><br/>
+
+        <strong>Address line 2:</strong> 
+        <input type="text"  id="edit-current-physical-living-address-2"  v-bind:value="current_physical_living_address_2"><br/>
+        
+        <strong>City:</strong> 
+        <input type="text"  id="edit-current-physical-living-address-city"  v-bind:value="current_physical_living_address_city"><br/>
+        <strong>State:</strong> 
+        <input type="text"  id="edit-current-physical-living-address-state"  v-bind:value="current_physical_living_address_state"><br/>
+        <strong>Zip code:</strong> 
+        <input type="text"  id="edit-current-physical-living-address-zip-code"  v-bind:value="current_physical_living_address_zip_code"><br/>
+        
+        <br/>
+        <strong>Phone number(s):</strong> <span v-for="phone_number in persons_phone_numbers">
+                <a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
+        </span>
+      </template>
+      <template v-else>
+        <button @click="isEditBasicInformation = true">Edit basic information</button><br/>
+        <strong>First name:</strong> [[ first_name ]]
+        <strong>Middle name:</strong> [[ middle_name ]]
+        <strong>Last name:</strong> [[ last_name ]]
+        <strong>Date of birth:</strong> [[ date_of_birth ]]
+        <strong>Age:</strong> [[ age ]]<br/>
+        <strong>Preferred name:</strong> [[ preferred_name ]]
+        <strong>Preferred gender pronouns:</strong> [[ preferred_gender_pronouns ]]
+        <br/>
+        <strong>Current physical living address:</strong> <a target="_blank" v-bind:href="'http://maps.google.com/maps?q='+current_physical_living_address_1+' '+current_physical_living_address_2+' '+current_physical_living_address_city+' '+current_physical_living_address_state+' '+current_physical_living_address_zip_code">
+        [[ current_physical_living_address_1 ]],
+        <span v-if="current_physical_living_address_2">[[ current_physical_living_address_2 ]], </span>[[ current_physical_living_address_city ]] 
+        [[ current_physical_living_address_state ]],
+        [[ current_physical_living_address_zip_code ]]</a>
+        <br/>
+        <strong>Phone number(s):</strong> <span v-for="phone_number in persons_phone_numbers">
+                <a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
+        </span>
+    </template>
       <h3>Table of contents</h3>
       <ul id="toc">
 
