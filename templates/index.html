@@ -13,6 +13,9 @@
 		font-family: sans-serif;
 		margin: 0;
 	}
+  h3 {
+    margin:10px 0;
+  }
 	pre {
     width:100%;display:block;
 
@@ -92,6 +95,7 @@ table {
                   app.safety_information = data.data.safety_information
                   app.mental_health_treatment_summary = data.data.mental_health_treatment_summary
                   app.medication_notes = data.data.medication_notes
+                  app.appointments = data.data.appointments
                 } else {
 									app.loggedIn = false;
 								}
@@ -114,6 +118,11 @@ table {
             medications: [],
             editContact: -1,
             isEditBasicInformation: false,
+            isEditSafetyInformation: false,
+            isEditPrecallCoping: false,
+            isEditMentalHealthTreatment: false,
+            isEditMedicationNotes: false,
+            appointments: []
 					}
 				},
 				created: function() {
@@ -167,6 +176,42 @@ table {
               app.persons_phone_numbers = data.persons_phone_numbers
             })
           },
+          editSafetyInformation: function(event) {
+            $.post('/edit_safety_information', {
+              "person_uuid": app.person_uuid,
+              'safety_information': $('#edit-safety-information').val()
+            }, function(data) {
+              app.isEditSafetyInformation = false
+              app.safety_information = data.safety_information
+            })
+          },
+          editPrecallCoping: function(event) {
+            $.post('/edit_precall_coping', {
+              "person_uuid": app.person_uuid,
+              'coping_techniques_to_use_before_calling_for_help': $('#edit-precall-coping').val()
+            }, function(data) {
+              app.isEditPrecallCoping = false
+              app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
+            })
+          },
+          editMentalHealthTreatment: function(event) {
+            $.post('/edit_mental_health_treatment', {
+              "person_uuid": app.person_uuid,
+              'mental_health_treatment_summary': $('#edit-mental-health-treatment-summary').val()
+            }, function(data) {
+              app.isEditMentalHealthTreatment = false
+              app.mental_health_treatment_summary = data.mental_health_treatment_summary
+            })
+          },
+          editMedicationNotes: function(event) {
+            $.post('/edit_medication_notes', {
+              "person_uuid": app.person_uuid,
+              'medication_notes': $('#edit-medication-notes').val()
+            }, function(data) {
+              app.isEditMedicationNotes = false
+              app.medication_notes = data.medication_notes
+            })
+          },
           deleteMedication: function(index) {
             $.post('/delete_medication', {"index": index, "person_uuid": app.person_uuid}, function(data) {
               console.log(JSON.stringify(data))
@@ -185,6 +230,24 @@ table {
               $('#add-medication-name').val('')
               $('#add-medication-tablet-size').val('')
               $('#add-medication-instructions').val('')
+            })
+          },
+          addAppointment: function(event) {
+            $.post('/add_appointment', {
+              "person_uuid": app.person_uuid,
+              "date": $('#add-appointment-date').val(),
+              "start_time": $('#add-appointment-start-time').val(),
+              "stop_time": $('#add-appointment-stop-time').val(),
+              "what": $('#add-appointment-what').val(),
+              "notes": $('#add-appointment-notes').val(),
+            }, function(data) {
+              console.log(JSON.stringify(data))
+              app.appointments = data
+              $('#add-appointment-date').val(''),
+              $('#add-appointment-start-time').val()
+              $('#add-appointment-stop-time').val()
+              $('#add-appointment-what').val()
+              $('#add-appointment-notes').val()
             })
           },
           deleteContact: function(index) {
@@ -313,14 +376,47 @@ table {
         <li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling for help</a></li>
         <li><a href="#mental-health-treatment-summary">Mental health treatment summary</a></li>
         <li><a href="#medications">Medications</a></li>
+        <li><a href="#appointments">Appointments</a></li>
         <li><a href="#contacts">Contacts</a></li>
       </ul>
-      <h3 id="safety-information">Safety information</h3>
+      <h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
+        <button @click="editSafetyInformation()">Save edits</button>
+      </template>
+        <template v-else><button @click="isEditSafetyInformation = true">Edit</button></h3></template></h3>
+      <template v-if="isEditSafetyInformation">
+        <textarea id="edit-safety-information" style="width:100%;height:200px;">[[ safety_information ]]</textarea>
+      </template>
+      <template v-else>
       <pre>[[ safety_information ]]</pre>
-      <h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling for help</h3>
-      <p>[[ coping_techniques_to_use_before_calling_for_help ]]</p>
-      <h3 id="mental_health_treatment_summary">Mental health treatment summary</h3>
-      <pre>[[ mental_health_treatment_summary ]]</pre>
+    </template>
+      <h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling for help 
+        <template v-if="isEditPrecallCoping">
+          <button @click="editPrecallCoping">Save edit</button>
+        </template>
+        <template v-else>
+          <button @click="isEditPrecallCoping = true">Edit</button>
+        </template>
+      </h3>
+      <template v-if="isEditPrecallCoping">
+        <textarea id="edit-precall-coping"  style="width:100%;height:30px;">[[ coping_techniques_to_use_before_calling_for_help ]]</textarea>
+      </template>
+      <template v-else>
+      <p>[[ coping_techniques_to_use_before_calling_for_help ]]</p></template>
+      <h3 id="mental_health_treatment_summary">Mental health treatment summary
+        <template v-if="isEditMentalHealthTreatment">
+          <button @click="editMentalHealthTreatment">Save edit</button>
+        </template>
+        <template v-else>
+          <button @click="isEditMentalHealthTreatment = true">Edit</button>
+        </template>
+
+      </h3>
+      <template v-if="isEditMentalHealthTreatment">
+        <textarea id="edit-mental-health-treatment-summary"  style="width:100%;height:30px;">[[ mental_health_treatment_summary ]]</textarea>
+      </template>
+      <template v-else>
+      <pre>[[ mental_health_treatment_summary ]]</pre></template>
+      
       <h3 id="medications">Medications</h3>
       <h4>Current medications</h4>
       <strong>Add medication:</strong> Name: <input type="text" id="add-medication-name"> 
@@ -330,8 +426,41 @@ table {
       <table><tr><th>Name</th><th>Tablet size</th><th>Instructions</th><th></th></tr>
       <tr v-for="(medication, index) in medications"><td>[[ medication.name ]]</td><td>[[ medication.tablet_size ]] MG</td><td>[[ medication.instructions ]]</td><td><button @click="deleteMedication(index)">X</button></td></tr>
       </table>
-      <h4>Medication notes</h4>
-      <pre>[[ medication_notes ]]</pre>
+      <h4>Medication notes
+        <template v-if="isEditMedicationNotes">
+          <button @click="editMedicationNotes">Save edit</button>
+        </template>
+        <template v-else>
+          <button @click="isEditMedicationNotes = true">Edit</button>
+        </template>
+
+
+      </h4>
+      <template v-if="isEditMedicationNotes">
+        <textarea id="edit-medication-notes"  style="width:100%;height:30px;">[[ medication_notes ]]</textarea>
+      </template>
+      <template v-else>
+      <pre>[[ medication_notes ]]</pre></template>
+      <h3 id="appointments">Appointments </h3>
+      <strong>Add appointment:</strong> <strong>Date:</strong> <input type="text" id="add-appointment-date"> 
+      <strong>Start time:</strong> <input type="text" id="add-appointment-start-time"> 
+      <strong>Stop time:</strong> <input type="text" id="add-appointment-stop-time"> 
+      <strong>What:</strong> <input type="text" id="add-appointment-what"> 
+      <strong>Notes:</strong> <textarea id="add-appointment-notes"></textarea>
+      <button @click="addAppointment">Add appointment</button><br/>
+      <table>
+        <tr><th>Date</th><th>Start time</th><th>Stop time</th><th>What</th><th>Notes</th></tr>
+        <tr v-for="appointment in appointments">
+          <td>[[ appointment.date ]]</td>
+          <td>[[ appointment.start_time ]]</td>
+          <td>[[ appointment.stop_time ]]</td>
+
+          <td>[[ appointment.what ]]</td>
+
+          <td>[[ appointment.notes ]]</td>
+        </tr>
+      </table>
+      <pre>[[ medication_notes ]]</pre></template>
       <h3 id="contacts">Contacts</h3>
       <strong>Name:</strong> <input type="text" id="add_contact_name" /> 
       <strong>Relationship:</strong> <input type="text" id="add_contact_relationship" /> 

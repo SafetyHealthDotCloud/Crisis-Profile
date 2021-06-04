@@ -113,6 +113,7 @@ class User(UserMixin, db.Model):
             data['safety_information'] = person.safety_information
             data['mental_health_treatment_summary'] = person.mental_health_treatment_summary 
             data['medication_notes'] = person.medication_notes
+            data['appointments'] = person.appointments
         return data
 
     def is_authenticated(self):
@@ -265,6 +266,39 @@ def edit_basic_information():
     db.session.commit()
     return jsonify(above_elements)
 
+@app.route('/edit_safety_information', methods=['POST'])
+def edit_safety_information():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.safety_information = request.form['safety_information']
+    db.session.commit()
+    return jsonify({'safety_information': person.safety_information})
+
+@app.route('/edit_precall_coping', methods=['POST'])
+def edit_precall_coping():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.coping_techniques_to_use_before_calling_for_help = request.form['coping_techniques_to_use_before_calling_for_help']
+    db.session.commit()
+    return jsonify({'coping_techniques_to_use_before_calling_for_help': person.coping_techniques_to_use_before_calling_for_help})
+
+@app.route('/edit_mental_health_treatment', methods=['POST'])
+def edit_mental_health_treatment():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.mental_health_treatment_summary = request.form['mental_health_treatment_summary']
+    db.session.commit()
+    return jsonify({'mental_health_treatment_summary': person.mental_health_treatment_summary})
+
+@app.route('/edit_medication_notes', methods=['POST'])
+def edit_medication_notes():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.medication_notes = request.form['medication_notes']
+    db.session.commit()
+    return jsonify({'medication_notes': person.medication_notes})
+
+
 @app.route('/add_medication', methods=['POST'])
 def add_medication():
     person_uuid = request.form['person_uuid']
@@ -291,6 +325,20 @@ def delete_medication():
     db.session.commit()
     return jsonify(medications)
 
+
+@app.route('/add_appointment', methods=['POST'])
+def add_appointment():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    appointments = person.appointments
+    if not appointments:
+        appointments = []
+    appointments.append({'date': request.form['date'], 'start_time': request.form['start_time'], 'stop_time': request.form['stop_time'], 'what': request.form['what'], 'notes': request.form['notes']})
+
+    person.appointments = appointments
+    flag_modified(person, "appointments")
+    db.session.commit()
+    return jsonify(appointments)
 
 @app.route('/delete_contact', methods=['POST'])
 def delete_contact():
