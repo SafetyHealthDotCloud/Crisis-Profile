@@ -2,29 +2,37 @@
 <html>
 
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta charset="UTF-8">
-  <title>Crisis Profile</title>
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/vue@next"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha512-NmLkDIU1C/C88wi324HBc+S2kLhi08PN5GDeUVVVC/BVt/9Izdsc9SVeVfA1UZbY3sHUlDSyRXhCzHfr6hmPPw==" crossorigin="anonymous" />
+	<title>Crisis Profile</title>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+	<script src="https://unpkg.com/vue@next"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha512-NmLkDIU1C/C88wi324HBc+S2kLhi08PN5GDeUVVVC/BVt/9Izdsc9SVeVfA1UZbY3sHUlDSyRXhCzHfr6hmPPw==" crossorigin="anonymous" />
 	<style>
 	body {
 		font-family: sans-serif;
 		margin: 0;
 	}
-  h3 {
-    margin:10px 0;
-  }
+	
+	h3 {
+		margin: 10px 0;
+	}
+	
 	pre {
-    width:100%;display:block;
-
-    white-space: pre-wrap;       /* Since CSS 2.1 */
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
-  }
+		width: 100%;
+		display: block;
+		white-space: pre-wrap;
+		/* Since CSS 2.1 */
+		white-space: -moz-pre-wrap;
+		/* Mozilla, since 1999 */
+		white-space: -pre-wrap;
+		/* Opera 4-6 */
+		white-space: -o-pre-wrap;
+		/* Opera 7 */
+		word-wrap: break-word;
+		/* Internet Explorer 5.5+ */
+	}
+	
 	#header,
 	#main {
 		padding: 10px;
@@ -39,96 +47,154 @@
 		font-size: 1.25em;
 		color: red
 	}
-  h2 {
-    font-size:1.15em
-  }
+	
+	h2 {
+		font-size: 1.15em
+	}
 	
 	h1 span {
 		font-size: .75em;
 		color: gray;
 	}
-  strong, th, h1, h2, h3, h4 {font-weight:bold}
-  h4 {font-style:italic}
-  h3, h4, p, pre, #toc, table {margin-bottom:10px}
-  #toc {list-style-type: square;padding-left:20px}
-table {
-  border-collapse:collapse;
-}
-#contacts input, #contacts textarea {
-  width:100%;
-}
-#contacts textarea {
-  height:100%
-}
-  th, td {border:1px solid #000; text-align:left; padding:5px; vertical-align: top;}
+	
+	strong,
+	th,
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-weight: bold
+	}
+	
+	h4 {
+		font-style: italic
+	}
+	
+	h3,
+	h4,
+	p,
+	pre,
+	#toc,
+	table {
+		margin-bottom: 10px
+	}
+	
+	#toc {
+		list-style-type: square;
+		padding-left: 20px
+	}
+	
+	table {
+		border-collapse: collapse;
+	}
+	
+	#contacts input,
+	#contacts textarea {
+		width: 100%;
+	}
+	
+	#contacts textarea {
+		height: 100%
+	}
+	
+	th,
+	td {
+		border: 1px solid #000;
+		text-align: left;
+		padding: 5px;
+		vertical-align: top;
+	}
 	</style>
 	<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 	<script>
 	$(function() {
-    function updateUserInfo() {
-    $.post('/user_info', function(data) {
-								if(data.result == 200) {
-                  app.person_uuid = data.data.id
-									app.loggedIn = true;
-									app.usersLoggedInEmail = data.data.email_address
-                  app.first_name = data.data.first_name
-                  app.middle_name = data.data.middle_name
-                  app.last_name = data.data.last_name
-                  app.preferred_name = data.data.preferred_name
-                  app.preferred_gender_pronouns = data.data.preferred_gender_pronouns
-                  app.date_of_birth = data.data.date_of_birth
-                  app.age = data.data.age
-                  app.persons_phone_numbers = data.data.persons_phone_numbers
-                  app.contacts = data.data.contacts
-                  app.current_physical_living_address_1 = data.data.current_physical_living_address_1
-                  if (data.data.current_physical_living_address_2) {
-                    app.current_physical_living_address_2 = data.data.current_physical_living_address_2
-                  } else {
-                    app.current_physical_living_address_2 = ''
-                  
-                  }
-                  app.current_physical_living_address_city = data.data.current_physical_living_address_city
-                  app.current_physical_living_address_state = data.data.current_physical_living_address_state
-                  app.current_physical_living_address_zip_code = data.data.current_physical_living_address_zip_code
-                  app.coping_techniques_to_use_before_calling_for_help = data.data.coping_techniques_to_use_before_calling_for_help
-								  app.medications = data.data.medications
-                  app.safety_information = data.data.safety_information
-                  app.mental_health_treatment_summary = data.data.mental_health_treatment_summary
-                  app.medication_notes = data.data.medication_notes
-                  app.appointments = data.data.appointments
-                } else {
-									app.loggedIn = false;
-								}
-							})
-    }
+		function updateUserInfo() {
+			$.post('/user_info', function(data) {
+				if(data.result == 200) {
+					app.is_professional = data.data.is_professional
+          app.is_admin = data.data.is_admin
+					app.usersLoggedInEmail = data.data.email_address
+					app.loggedIn = true
+					if(data.data.person_id) {
+						app.getProfile(data.data.person_id)
+					}
+          if (app.is_admin) {
+            app.getApprovedProfessionals()
+          }
+				} else {
+					app.loggedIn = false;
+				}
+			})
+		}
 		const App = {
 			data() {
 					return {
 						sentLoginEmail: false,
 						email: '',
 						loggedIn: false,
+						search_results: [],
 						usersLoggedInEmail: '',
-            first_name: '',
-            middle_name: '',
-            last_name: '',
-            date_of_birth: '',
-            age: '',
-            persons_phone_numbers: [],
-            contacts: [],
-            medications: [],
-            editContact: -1,
-            isEditBasicInformation: false,
-            isEditSafetyInformation: false,
-            isEditPrecallCoping: false,
-            isEditMentalHealthTreatment: false,
-            isEditMedicationNotes: false,
-            appointments: []
+						first_name: '',
+						middle_name: '',
+						last_name: '',
+						date_of_birth: '',
+						age: '',
+						persons_phone_numbers: [],
+						contacts: [],
+						medications: [],
+						editContact: -1,
+						isEditBasicInformation: false,
+						isEditSafetyInformation: false,
+						isEditPrecallCoping: false,
+						isEditMentalHealthTreatment: false,
+						isEditMedicationNotes: false,
+						appointments: [],
+						person_uuid: null,
+            is_admin: false,
+            approved_professional_domains: [],
 					}
 				},
 				created: function() {
 					updateUserInfo()
 				},
 				methods: {
+          getApprovedProfessionals: function() {
+            $.get('/get_approved_professionals', function(data) {
+              console.log(JSON.stringify(data))
+              app.approved_professional_domains = data.domains
+            })
+          },
+					getProfile: function(person_id) {
+						$.get('/get_profile', {
+							'person_id': person_id
+						}, function(data) {
+							app.person_uuid = data.id
+							app.first_name = data.first_name
+							app.middle_name = data.middle_name
+							app.last_name = data.last_name
+							app.preferred_name = data.preferred_name
+							app.preferred_gender_pronouns = data.preferred_gender_pronouns
+							app.date_of_birth = data.date_of_birth
+							app.age = data.age
+							app.persons_phone_numbers = data.persons_phone_numbers
+							app.contacts = data.contacts
+							app.current_physical_living_address_1 = data.current_physical_living_address_1
+							if(data.current_physical_living_address_2) {
+								app.current_physical_living_address_2 = data.current_physical_living_address_2
+							} else {
+								app.current_physical_living_address_2 = ''
+							}
+							app.current_physical_living_address_city = data.current_physical_living_address_city
+							app.current_physical_living_address_state = data.current_physical_living_address_state
+							app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
+							app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
+							app.medications = data.medications
+							app.safety_information = data.safety_information
+							app.mental_health_treatment_summary = data.mental_health_treatment_summary
+							app.medication_notes = data.medication_notes
+							app.appointments = data.appointments
+						});
+					},
 					sendLoginEmail: function(event) {
 						this.email = $('#login_email').val();
 						$.post("/send_login_email", {
@@ -145,148 +211,173 @@ table {
 							updateUserInfo()
 						});
 					},
-          editBasicInformation: function(data) {
-            $.post('/edit_basic_information', {
-              "person_uuid": app.person_uuid,
-              "first_name": $('#edit-first-name').val(),
-              "middle_name": $('#edit-middle-name').val(),
-              "last_name": $('#edit-last-name').val(),
-              "preferred_name": $('#edit-preferred-name').val(),
-              "preferred_gender_pronouns": $( "#edit-preferred-gender-pronouns option:selected" ).text(),
-              "current_physical_living_address_1": $('#edit-current-physical-living-address-1').val(),
-              "current_physical_living_address_2": $('#edit-current-physical-living-address-2').val(),
-              "current_physical_living_address_city": $('#edit-current-physical-living-address-city').val(),
-              "current_physical_living_address_state": $('#edit-current-physical-living-address-state').val(),
-              "current_physical_living_address_zip_code": $('#edit-current-physical-living-address-zip-code').val(),
-              "phone_number_0": $('#edit-phone-number-0').val(),
-              "phone_number_type_0": $('#edit-phone-number-type-0').val(),
-            }, function(data) {
-              console.log(JSON.stringify(data))
-              app.isEditBasicInformation = false
-              app.first_name = data.first_name
-              app.middle_name = data.middle_name
-              app.last_name = data.last_name
-              app.preferred_name = data.preferred_name
-              app.preferred_gender_pronouns = data.preferred_gender_pronouns
-              app.current_physical_living_address_1 = data.current_physical_living_address_1
-              app.current_physical_living_address_2 = data.current_physical_living_address_2
-              app.current_physical_living_address_city = data.current_physical_living_address_city
-              app.current_physical_living_address_state = data.current_physical_living_address_state
-              app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
-              app.persons_phone_numbers = data.persons_phone_numbers
-            })
-          },
-          editSafetyInformation: function(event) {
-            $.post('/edit_safety_information', {
-              "person_uuid": app.person_uuid,
-              'safety_information': $('#edit-safety-information').val()
-            }, function(data) {
-              app.isEditSafetyInformation = false
-              app.safety_information = data.safety_information
-            })
-          },
-          editPrecallCoping: function(event) {
-            $.post('/edit_precall_coping', {
-              "person_uuid": app.person_uuid,
-              'coping_techniques_to_use_before_calling_for_help': $('#edit-precall-coping').val()
-            }, function(data) {
-              app.isEditPrecallCoping = false
-              app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
-            })
-          },
-          editMentalHealthTreatment: function(event) {
-            $.post('/edit_mental_health_treatment', {
-              "person_uuid": app.person_uuid,
-              'mental_health_treatment_summary': $('#edit-mental-health-treatment-summary').val()
-            }, function(data) {
-              app.isEditMentalHealthTreatment = false
-              app.mental_health_treatment_summary = data.mental_health_treatment_summary
-            })
-          },
-          editMedicationNotes: function(event) {
-            $.post('/edit_medication_notes', {
-              "person_uuid": app.person_uuid,
-              'medication_notes': $('#edit-medication-notes').val()
-            }, function(data) {
-              app.isEditMedicationNotes = false
-              app.medication_notes = data.medication_notes
-            })
-          },
-          deleteMedication: function(index) {
-            $.post('/delete_medication', {"index": index, "person_uuid": app.person_uuid}, function(data) {
-              console.log(JSON.stringify(data))
-              app.medications = data
-            });
-          },
-          addMedication: function(event) {
-            $.post('/add_medication', {
-              "person_uuid": app.person_uuid,
-              "name": $('#add-medication-name').val(),
-              "tablet_size": $('#add-medication-tablet-size').val(),
-              "instructions": $('#add-medication-instructions').val()
-            }, function(data) {
-              console.log(JSON.stringify(data))
-              app.medications = data
-              $('#add-medication-name').val('')
-              $('#add-medication-tablet-size').val('')
-              $('#add-medication-instructions').val('')
-            })
-          },
-          addAppointment: function(event) {
-            $.post('/add_appointment', {
-              "person_uuid": app.person_uuid,
-              "date": $('#add-appointment-date').val(),
-              "start_time": $('#add-appointment-start-time').val(),
-              "stop_time": $('#add-appointment-stop-time').val(),
-              "what": $('#add-appointment-what').val(),
-              "notes": $('#add-appointment-notes').val(),
-            }, function(data) {
-              console.log(JSON.stringify(data))
-              app.appointments = data
-              $('#add-appointment-date').val(''),
-              $('#add-appointment-start-time').val()
-              $('#add-appointment-stop-time').val()
-              $('#add-appointment-what').val()
-              $('#add-appointment-notes').val()
-            })
-          },
-          deleteContact: function(index) {
-            $.post('/delete_contact', {"index": index, "person_uuid": app.person_uuid}, function(data) {
-              console.log(JSON.stringify(data))
-              app.contacts = data
-            });
-          },
-          addContact: function(event) {
-            $.post('/add_contact', {
-              "person_uuid": app.person_uuid,
-              "name": $('#add_contact_name').val(),
-              "relationship": $('#add_contact_relationship').val(),
-              "phone_number": $('#add_contact_phone_number').val(),
-              "email": $('#add_contact_email').val(),
-              "notes": $('#add_contact_notes').val()
-            }, function(data) {
-              app.contacts = data
-              $('#add_contact_name').val('')
-              $('#add_contact_relationship').val('')
-              $('#add_contact_phone_number').val('')
-              $('#add_contact_email').val('')
-              $('#add_contact_notes').val('')
-            })
-          },
-          editAContact: function(index) {
-            $.post('/edit_contact', {
-              "person_uuid": app.person_uuid,
-              "index": index,
-              "name": $('#edit-contact-name-'+index).val(),
-              "relationship": $('#edit-contact-relationship-'+index).val(),
-              "phone_number": $('#edit-contact-phone-number-'+index).val(),
-              "email": $('#edit-contact-email-'+index).val(),
-              "notes": $('#edit-contact-notes-'+index).val()
-            }, function(data){
-              app.editContact = -1;
-              app.contacts = data;
-            })
+					search: function(event) {
+						$.get("/search", {
+							first_name: $('#search-first-name').val(),
+							last_name: $('#search-last-name').val()
+						}, function(data) {
+							app.search_results = data
+						})
+					},
+					editBasicInformation: function(data) {
+						$.post('/edit_basic_information', {
+							"person_uuid": app.person_uuid,
+							"first_name": $('#edit-first-name').val(),
+							"middle_name": $('#edit-middle-name').val(),
+							"last_name": $('#edit-last-name').val(),
+							"preferred_name": $('#edit-preferred-name').val(),
+							"preferred_gender_pronouns": $("#edit-preferred-gender-pronouns option:selected").text(),
+							"current_physical_living_address_1": $('#edit-current-physical-living-address-1').val(),
+							"current_physical_living_address_2": $('#edit-current-physical-living-address-2').val(),
+							"current_physical_living_address_city": $('#edit-current-physical-living-address-city').val(),
+							"current_physical_living_address_state": $('#edit-current-physical-living-address-state').val(),
+							"current_physical_living_address_zip_code": $('#edit-current-physical-living-address-zip-code').val(),
+							"phone_number_0": $('#edit-phone-number-0').val(),
+							"phone_number_type_0": $('#edit-phone-number-type-0').val(),
+						}, function(data) {
+							app.isEditBasicInformation = false
+							app.first_name = data.first_name
+							app.middle_name = data.middle_name
+							app.last_name = data.last_name
+							app.preferred_name = data.preferred_name
+							app.preferred_gender_pronouns = data.preferred_gender_pronouns
+							app.current_physical_living_address_1 = data.current_physical_living_address_1
+							app.current_physical_living_address_2 = data.current_physical_living_address_2
+							app.current_physical_living_address_city = data.current_physical_living_address_city
+							app.current_physical_living_address_state = data.current_physical_living_address_state
+							app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
+							app.persons_phone_numbers = data.persons_phone_numbers
+						})
+					},
+					editSafetyInformation: function(event) {
+						$.post('/edit_safety_information', {
+							"person_uuid": app.person_uuid,
+							'safety_information': $('#edit-safety-information').val()
+						}, function(data) {
+							app.isEditSafetyInformation = false
+							app.safety_information = data.safety_information
+						})
+					},
+					editPrecallCoping: function(event) {
+						$.post('/edit_precall_coping', {
+							"person_uuid": app.person_uuid,
+							'coping_techniques_to_use_before_calling_for_help': $('#edit-precall-coping').val()
+						}, function(data) {
+							app.isEditPrecallCoping = false
+							app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
+						})
+					},
+					editMentalHealthTreatment: function(event) {
+						$.post('/edit_mental_health_treatment', {
+							"person_uuid": app.person_uuid,
+							'mental_health_treatment_summary': $('#edit-mental-health-treatment-summary').val()
+						}, function(data) {
+							app.isEditMentalHealthTreatment = false
+							app.mental_health_treatment_summary = data.mental_health_treatment_summary
+						})
+					},
+					editMedicationNotes: function(event) {
+						$.post('/edit_medication_notes', {
+							"person_uuid": app.person_uuid,
+							'medication_notes': $('#edit-medication-notes').val()
+						}, function(data) {
+							app.isEditMedicationNotes = false
+							app.medication_notes = data.medication_notes
+						})
+					},
+					deleteMedication: function(index) {
+						$.post('/delete_medication', {
+							"index": index,
+							"person_uuid": app.person_uuid
+						}, function(data) {
+							app.medications = data
+						});
+					},
+					addMedication: function(event) {
+						$.post('/add_medication', {
+							"person_uuid": app.person_uuid,
+							"name": $('#add-medication-name').val(),
+							"tablet_size": $('#add-medication-tablet-size').val(),
+							"instructions": $('#add-medication-instructions').val()
+						}, function(data) {
+							app.medications = data
+							$('#add-medication-name').val('')
+							$('#add-medication-tablet-size').val('')
+							$('#add-medication-instructions').val('')
+						})
+					},
+					addAppointment: function(event) {
+						$.post('/add_appointment', {
+							"person_uuid": app.person_uuid,
+							"date": $('#add-appointment-date').val(),
+							"start_time": $('#add-appointment-start-time').val(),
+							"stop_time": $('#add-appointment-stop-time').val(),
+							"what": $('#add-appointment-what').val(),
+							"notes": $('#add-appointment-notes').val(),
+						}, function(data) {
+							app.appointments = data
+							$('#add-appointment-date').val(''),
+								$('#add-appointment-start-time').val('')
+							$('#add-appointment-stop-time').val('')
+							$('#add-appointment-what').val('')
+							$('#add-appointment-notes').val('')
+						})
+					},
+					deleteEvent: function(index) {
+						$.post('/delete_appointment', {
+							"index": index,
+							"person_uuid": app.person_uuid
+						}, function(data) {
+							app.appointments = data
+						});
+					},
+					deleteContact: function(index) {
+						$.post('/delete_contact', {
+							"index": index,
+							"person_uuid": app.person_uuid
+						}, function(data) {
+							app.contacts = data
+						});
+					},
+					addContact: function(event) {
+						$.post('/add_contact', {
+							"person_uuid": app.person_uuid,
+							"name": $('#add_contact_name').val(),
+							"relationship": $('#add_contact_relationship').val(),
+							"phone_number": $('#add_contact_phone_number').val(),
+							"email": $('#add_contact_email').val(),
+							"notes": $('#add_contact_notes').val()
+						}, function(data) {
+							app.contacts = data
+							$('#add_contact_name').val('')
+							$('#add_contact_relationship').val('')
+							$('#add_contact_phone_number').val('')
+							$('#add_contact_email').val('')
+							$('#add_contact_notes').val('')
+						})
+					},
+					editAContact: function(index) {
+						$.post('/edit_contact', {
+							"person_uuid": app.person_uuid,
+							"index": index,
+							"name": $('#edit-contact-name-' + index).val(),
+							"relationship": $('#edit-contact-relationship-' + index).val(),
+							"phone_number": $('#edit-contact-phone-number-' + index).val(),
+							"email": $('#edit-contact-email-' + index).val(),
+							"notes": $('#edit-contact-notes-' + index).val()
+						}, function(data) {
+							app.editContact = -1;
+							app.contacts = data;
+						})
+					},
+          addProfessionalDomain: function() {
+            $.post('/add_professional_domain', {'domain': $('#add-professional-domain').val()}, function(data)
+          {
+            $('#add-professional-domain').val('')
+            app.approved_professional_domains = data
+          })
           }
+
 				},
 				delimiters: ['[[', ']]']
 		}
@@ -297,99 +388,84 @@ table {
 
 <body>
 	<div id="app">
-		<div id="header"> <span style="float:right">[[ usersLoggedInEmail ]]</span>
-      <h1>Crisis Profile<span> Care coordination for people in crisis</span></h1>
-      <div id="main">
-		<div v-if="!loggedIn">
-			<h3>Login</h3>
-			<div v-if="sentLoginEmail"> <strong>Your login code:</strong>
-				<input type="text" id="login_code" />
-				<button @click="login">Login</button>
+		<div id="header"> <span style="float:right" v-if="loggedIn"><a href="/logout">Logout</a> | [[ usersLoggedInEmail ]]</span>
+			<h1>Crisis Profile by <a href="https://crisisresponse.services">Crisis Response Services</a><span> A care coordination app to help people in crisis</span></h1> </div>
+		<div id="main">
+			<div v-if="!loggedIn">
+				<h3>Login</h3>
+				<div v-if="sentLoginEmail"> <strong>Your login code:</strong>
+					<input type="text" id="login_code" v-on:keyup.enter="login" />
+					<button @click="login">Login</button>
+				</div>
+				<div v-else> <strong>Your email (if you're a professional needing access for work then use your work email address):</strong>
+					<br/>
+					<input type="text" name="email" id="login_email" style="width:300px" v-on:keyup.enter="sendLoginEmail" />
+					<button @click="sendLoginEmail">Login</button>
+				</div>
 			</div>
-			<div v-else> <strong>Your email (if you're a professional needing access for work then use your work email address):</strong>
-				<input type="text" name="email" id="login_email" />
-				<button @click="sendLoginEmail">Login</button>
-			</div>
-    </div>
-    <div v-else>
-      <template v-if="isEditBasicInformation">
-        <button @click="editBasicInformation()">Save basic information</button><br/>
-        <strong>First name:</strong> <input type="text" id="edit-first-name" v-bind:value="first_name"> 
-        <strong>Middle name:</strong> <input type="text"  id="edit-middle-name" v-bind:value="middle_name"> 
-        <strong>Last name:</strong> <input type="text"  id="edit-last-name"  v-bind:value="last_name"> 
-        <strong>Date of birth:</strong> [[ date_of_birth ]]
-        <strong>Age:</strong> [[ age ]]<br/>
-        <strong>Preferred name:</strong> <input type="text"  id="edit-preferred-name"  v-bind:value="preferred_name"> 
-        <strong>Preferred gender pronouns:</strong> 
-        <select  id="edit-preferred-gender-pronouns">
-          
-          <option :selected="preferred_gender_pronouns == 'she/her/hers'" value="she/her/hers">she/her/hers</option>
-          <option :selected="preferred_gender_pronouns == 'they/them/their'" value="they/them/their">they/them/their</option>
-          <option :selected="preferred_gender_pronouns == 'he/him/his'" value="he/him/his">he/him/his</option>
-        </select>
-        <br/>
-        <strong>Current physical living address:</strong> <br/>
-        <strong>Address line 1:</strong> 
-        <input type="text"  id="edit-current-physical-living-address-1"  v-bind:value="current_physical_living_address_1"><br/>
-
-        <strong>Address line 2:</strong> 
-        <input type="text"  id="edit-current-physical-living-address-2"  v-bind:value="current_physical_living_address_2"><br/>
-        
-        <strong>City:</strong> 
-        <input type="text"  id="edit-current-physical-living-address-city"  v-bind:value="current_physical_living_address_city"><br/>
-        <strong>State:</strong> 
-        <input type="text"  id="edit-current-physical-living-address-state"  v-bind:value="current_physical_living_address_state"><br/>
-        <strong>Zip code:</strong> 
-        <input type="text"  id="edit-current-physical-living-address-zip-code"  v-bind:value="current_physical_living_address_zip_code"><br/>
-        
-        <br/>
-        <strong>Phone number(s):</strong> <span v-for="(phone_number, index) in persons_phone_numbers">
+			<div v-else-if="person_uuid">
+				<button @click="person_uuid = null">Back to people list</button>
+				<br/>
+				<template v-if="isEditBasicInformation">
+					<button @click="editBasicInformation()">Save basic information</button>
+					<br/> <strong>First name:</strong>
+					<input type="text" id="edit-first-name" v-bind:value="first_name"> <strong>Middle name:</strong>
+					<input type="text" id="edit-middle-name" v-bind:value="middle_name"> <strong>Last name:</strong>
+					<input type="text" id="edit-last-name" v-bind:value="last_name"> <strong>Date of birth:</strong> [[ date_of_birth ]] <strong>Age:</strong> [[ age ]]
+					<br/> <strong>Preferred name:</strong>
+					<input type="text" id="edit-preferred-name" v-bind:value="preferred_name"> <strong>Preferred gender pronouns:</strong>
+					<select id="edit-preferred-gender-pronouns">
+						<option :selected="preferred_gender_pronouns == 'she/her/hers'" value="she/her/hers">she/her/hers</option>
+						<option :selected="preferred_gender_pronouns == 'they/them/their'" value="they/them/their">they/them/their</option>
+						<option :selected="preferred_gender_pronouns == 'he/him/his'" value="he/him/his">he/him/his</option>
+					</select>
+					<br/> <strong>Current physical living address:</strong>
+					<br/> <strong>Address line 1:</strong>
+					<input type="text" id="edit-current-physical-living-address-1" v-bind:value="current_physical_living_address_1">
+					<br/> <strong>Address line 2:</strong>
+					<input type="text" id="edit-current-physical-living-address-2" v-bind:value="current_physical_living_address_2">
+					<br/> <strong>City:</strong>
+					<input type="text" id="edit-current-physical-living-address-city" v-bind:value="current_physical_living_address_city">
+					<br/> <strong>State:</strong>
+					<input type="text" id="edit-current-physical-living-address-state" v-bind:value="current_physical_living_address_state">
+					<br/> <strong>Zip code:</strong>
+					<input type="text" id="edit-current-physical-living-address-zip-code" v-bind:value="current_physical_living_address_zip_code">
+					<br/>
+					<br/> <strong>Phone number(s):</strong> <span v-for="(phone_number, index) in persons_phone_numbers">
                 <input type="text" v-bind:id="'edit-phone-number-'+index" v-bind:value="phone_number.phone_number"> 
                 (<strong>Phone type:</strong> <input tye="text" v-bind:id="'edit-phone-number-type-'+index" v-bind:value="phone_number.type">)
-        </span>
-      </template>
-      <template v-else>
-        <button @click="isEditBasicInformation = true">Edit basic information</button><br/>
-        <strong>First name:</strong> [[ first_name ]]
-        <strong>Middle name:</strong> [[ middle_name ]]
-        <strong>Last name:</strong> [[ last_name ]]
-        <strong>Date of birth:</strong> [[ date_of_birth ]]
-        <strong>Age:</strong> [[ age ]]<br/>
-        <strong>Preferred name:</strong> [[ preferred_name ]]
-        <strong>Preferred gender pronouns:</strong> [[ preferred_gender_pronouns ]]
-        <br/>
-        <strong>Current physical living address:</strong> <a target="_blank" v-bind:href="'http://maps.google.com/maps?q='+current_physical_living_address_1+' '+current_physical_living_address_2+' '+current_physical_living_address_city+' '+current_physical_living_address_state+' '+current_physical_living_address_zip_code">
+        </span> </template>
+				<template v-else>
+					<button @click="isEditBasicInformation = true">Edit basic information</button>
+					<br/> <strong>First name:</strong> [[ first_name ]] <strong>Middle name:</strong> [[ middle_name ]] <strong>Last name:</strong> [[ last_name ]] <strong>Date of birth:</strong> [[ date_of_birth ]] <strong>Age:</strong> [[ age ]]
+					<br/> <strong>Preferred name:</strong> [[ preferred_name ]] <strong>Preferred gender pronouns:</strong> [[ preferred_gender_pronouns ]]
+					<br/> <strong>Current physical living address:</strong> <a target="_blank" v-bind:href="'http://maps.google.com/maps?q='+current_physical_living_address_1+' '+current_physical_living_address_2+' '+current_physical_living_address_city+' '+current_physical_living_address_state+' '+current_physical_living_address_zip_code">
         [[ current_physical_living_address_1 ]],
         <span v-if="current_physical_living_address_2">[[ current_physical_living_address_2 ]], </span>[[ current_physical_living_address_city ]] 
         [[ current_physical_living_address_state ]],
         [[ current_physical_living_address_zip_code ]]</a>
-        <br/>
-        <strong>Phone number(s):</strong> <span v-for="phone_number in persons_phone_numbers">
+					<br/> <strong>Phone number(s):</strong> <span v-for="phone_number in persons_phone_numbers">
                 <a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
-        </span>
-    </template>
-      <h3>Table of contents</h3>
-      <ul id="toc">
-
-        <li><a href="#safety-information">Safety Information</a></li>
-
-        <li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling for help</a></li>
-        <li><a href="#mental-health-treatment-summary">Mental health treatment summary</a></li>
-        <li><a href="#medications">Medications</a></li>
-        <li><a href="#appointments">Appointments</a></li>
-        <li><a href="#contacts">Contacts</a></li>
-      </ul>
-      <h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
+        </span> </template>
+				<h3>Table of contents</h3>
+				<ul id="toc">
+					<li><a href="#safety-information">Safety Information</a></li>
+					<li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911</a></li>
+					<li><a href="#mental-health-treatment-summary">Mental health treatment summary</a></li>
+					<li><a href="#medications">Medications</a></li>
+					<li><a href="#appointments">Appointments</a></li>
+					<li><a href="#contacts">Contacts</a></li>
+				</ul>
+				<h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
         <button @click="editSafetyInformation()">Save edits</button>
       </template>
-        <template v-else><button @click="isEditSafetyInformation = true">Edit</button></h3></template></h3>
-      <template v-if="isEditSafetyInformation">
-        <textarea id="edit-safety-information" style="width:100%;height:200px;">[[ safety_information ]]</textarea>
-      </template>
-      <template v-else>
-      <pre>[[ safety_information ]]</pre>
-    </template>
-      <h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling for help 
+        <template v-else><button @click="isEditSafetyInformation = true">Edit</button></h3></template>
+				</h3>
+				<template v-if="isEditSafetyInformation">
+					<textarea id="edit-safety-information" style="width:100%;height:200px;">[[ safety_information ]]</textarea>
+				</template>
+				<template v-else> <pre>[[ safety_information ]]</pre> </template>
+				<h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 
         <template v-if="isEditPrecallCoping">
           <button @click="editPrecallCoping">Save edit</button>
         </template>
@@ -397,12 +473,13 @@ table {
           <button @click="isEditPrecallCoping = true">Edit</button>
         </template>
       </h3>
-      <template v-if="isEditPrecallCoping">
-        <textarea id="edit-precall-coping"  style="width:100%;height:30px;">[[ coping_techniques_to_use_before_calling_for_help ]]</textarea>
-      </template>
-      <template v-else>
-      <p>[[ coping_techniques_to_use_before_calling_for_help ]]</p></template>
-      <h3 id="mental_health_treatment_summary">Mental health treatment summary
+				<template v-if="isEditPrecallCoping">
+					<textarea id="edit-precall-coping" style="width:100%;height:30px;">[[ coping_techniques_to_use_before_calling_for_help ]]</textarea>
+				</template>
+				<template v-else>
+					<p>[[ coping_techniques_to_use_before_calling_for_help ]]</p>
+				</template>
+				<h3 id="mental_health_treatment_summary">Mental health treatment summary
         <template v-if="isEditMentalHealthTreatment">
           <button @click="editMentalHealthTreatment">Save edit</button>
         </template>
@@ -411,22 +488,33 @@ table {
         </template>
 
       </h3>
-      <template v-if="isEditMentalHealthTreatment">
-        <textarea id="edit-mental-health-treatment-summary"  style="width:100%;height:30px;">[[ mental_health_treatment_summary ]]</textarea>
-      </template>
-      <template v-else>
-      <pre>[[ mental_health_treatment_summary ]]</pre></template>
-      
-      <h3 id="medications">Medications</h3>
-      <h4>Current medications</h4>
-      <strong>Add medication:</strong> Name: <input type="text" id="add-medication-name"> 
-      Tablet size: <input type="text" id="add-medication-tablet-size"> 
-      Instructions: <input type="text" id="add-medication-instructions"> 
-      <button @click="addMedication">Add medication</button>
-      <table><tr><th>Name</th><th>Tablet size</th><th>Instructions</th><th></th></tr>
-      <tr v-for="(medication, index) in medications"><td>[[ medication.name ]]</td><td>[[ medication.tablet_size ]] MG</td><td>[[ medication.instructions ]]</td><td><button @click="deleteMedication(index)">X</button></td></tr>
-      </table>
-      <h4>Medication notes
+				<template v-if="isEditMentalHealthTreatment">
+					<textarea id="edit-mental-health-treatment-summary" style="width:100%;height:30px;">[[ mental_health_treatment_summary ]]</textarea>
+				</template>
+				<template v-else> <pre>[[ mental_health_treatment_summary ]]</pre></template>
+				<h3 id="medications">Medications</h3>
+				<h4>Current medications</h4> <strong>Add medication:</strong> Name:
+				<input type="text" id="add-medication-name"> Tablet size:
+				<input type="text" id="add-medication-tablet-size"> Instructions:
+				<input type="text" id="add-medication-instructions">
+				<button @click="addMedication">Add medication</button>
+				<table>
+					<tr>
+						<th>Name</th>
+						<th>Tablet size</th>
+						<th>Instructions</th>
+						<th></th>
+					</tr>
+					<tr v-for="(medication, index) in medications">
+						<td>[[ medication.name ]]</td>
+						<td>[[ medication.tablet_size ]] MG</td>
+						<td>[[ medication.instructions ]]</td>
+						<td>
+							<button @click="deleteMedication(index)">X</button>
+						</td>
+					</tr>
+				</table>
+				<h4>Medication notes
         <template v-if="isEditMedicationNotes">
           <button @click="editMedicationNotes">Save edit</button>
         </template>
@@ -436,77 +524,122 @@ table {
 
 
       </h4>
-      <template v-if="isEditMedicationNotes">
-        <textarea id="edit-medication-notes"  style="width:100%;height:30px;">[[ medication_notes ]]</textarea>
-      </template>
-      <template v-else>
-      <pre>[[ medication_notes ]]</pre></template>
-      <h3 id="appointments">Appointments </h3>
-      <strong>Add appointment:</strong> <strong>Date:</strong> <input type="text" id="add-appointment-date"> 
-      <strong>Start time:</strong> <input type="text" id="add-appointment-start-time"> 
-      <strong>Stop time:</strong> <input type="text" id="add-appointment-stop-time"> 
-      <strong>What:</strong> <input type="text" id="add-appointment-what"> 
-      <strong>Notes:</strong> <textarea id="add-appointment-notes"></textarea>
-      <button @click="addAppointment">Add appointment</button><br/>
-      <table>
-        <tr><th>Date</th><th>Start time</th><th>Stop time</th><th>What</th><th>Notes</th></tr>
-        <tr v-for="appointment in appointments">
-          <td>[[ appointment.date ]]</td>
-          <td>[[ appointment.start_time ]]</td>
-          <td>[[ appointment.stop_time ]]</td>
-
-          <td>[[ appointment.what ]]</td>
-
-          <td>[[ appointment.notes ]]</td>
-        </tr>
-      </table>
-      <pre>[[ medication_notes ]]</pre></template>
-      <h3 id="contacts">Contacts</h3>
-      <strong>Name:</strong> <input type="text" id="add_contact_name" /> 
-      <strong>Relationship:</strong> <input type="text" id="add_contact_relationship" /> 
-      <strong>Phone number:</strong> <input type="text" id="add_contact_phone_number" /> 
-      <strong>Email:</strong> <input type="text" id="add_contact_email" /> 
-      <strong>Notes:</strong> <textarea id="add_contact_notes"></textarea>
-      <button @click="addContact">Add contact</button>
-      <table id="contacts">
-        <tr><th>Name</th><th>Relationship</th><th>Phone number</th><th>Email</th><th>Notes</th><th></th></tr>
-        <tr v-for="(contact, index) in contacts">
-          <td><template v-if="index == editContact">
-            <input type="text" v-bind:id="'edit-contact-name-'+index" v-bind:value="contact.name">
-          </template>
-            <template v-else>
-              [[ contact.name ]]
-            </template></td>
-          <td>
-            <template v-if="index == editContact">
-              <input type="text" v-bind:id="'edit-contact-relationship-'+index" v-bind:value="contact.relationship">
-            </template>
-              <template v-else>
-                [[ contact.relationship ]]
-              </template>
-            </td>
-        <td>
-          <template v-if="index == editContact">
-            <input type="text" v-bind:id="'edit-contact-phone-number-'+index" v-bind:value="contact.phone_number">
-          </template>
-            <template v-else>
-          <a v-bind:href="'tel:+1'+contact.phone_number">[[ contact.phone_number ]]</a></td>
-            </template></td>
-        <td><template v-if="index == editContact">
-          <input type="text" v-bind:id="'edit-contact-email-'+index" v-bind:value="contact.email">
-        </template>
-          <template v-else>
-          <a v-bind:href="'mailto:'+contact.email">
-          [[ contact.email ]]</a></template></td>
-        <td><template v-if="index == editContact"><textarea v-bind:id="'edit-contact-notes-'+index">[[ contact.notes ]]</textarea></template><template v-else>[[ contact.notes ]]</template></td>
-        <td><template v-if="index == editContact"><button @click="editAContact(index)">Save</button>
-        </template><template v-else><button @click="editContact = index">Edit</button>
-        </template>
-          <button @click="deleteContact(index)">X</button></td>
-        </tr>
+				<template v-if="isEditMedicationNotes">
+					<textarea id="edit-medication-notes" style="width:100%;height:30px;">[[ medication_notes ]]</textarea>
+				</template>
+				<template v-else> <pre>[[ medication_notes ]]</pre></template>
+				<h3 id="appointments">Appointments </h3> <strong>Add appointment:</strong> <strong>Date:</strong>
+				<input type="text" id="add-appointment-date"> <strong>Start time:</strong>
+				<input type="text" id="add-appointment-start-time"> <strong>Stop time:</strong>
+				<input type="text" id="add-appointment-stop-time"> <strong>What:</strong>
+				<input type="text" id="add-appointment-what"> <strong>Notes:</strong>
+				<textarea id="add-appointment-notes"></textarea>
+				<button @click="addAppointment">Add appointment</button>
+				<br/>
+				<table>
+					<tr>
+						<th>Date</th>
+						<th>Start time</th>
+						<th>Stop time</th>
+						<th>What</th>
+						<th>Notes</th>
+						<th></th>
+					</tr>
+					<tr v-for="(appointment, index) in appointments">
+						<td>[[ appointment.date ]]</td>
+						<td>[[ appointment.start_time ]]</td>
+						<td>[[ appointment.stop_time ]]</td>
+						<td>[[ appointment.what ]]</td>
+						<td>[[ appointment.notes ]]</td>
+						<td>
+							<button @click="deleteEvent(index)">X</button>
+						</td>
+					</tr>
+				</table> <pre>[[ medication_notes ]]</pre></template>
+				<h3 id="contacts">Contacts</h3> <strong>Name:</strong>
+				<input type="text" id="add_contact_name" /> <strong>Relationship:</strong>
+				<input type="text" id="add_contact_relationship" /> <strong>Phone number:</strong>
+				<input type="text" id="add_contact_phone_number" /> <strong>Email:</strong>
+				<input type="text" id="add_contact_email" /> <strong>Notes:</strong>
+				<textarea id="add_contact_notes"></textarea>
+				<button @click="addContact">Add contact</button>
+				<table id="contacts">
+					<tr>
+						<th>Name</th>
+						<th>Relationship</th>
+						<th>Phone number</th>
+						<th>Email</th>
+						<th>Notes</th>
+						<th></th>
+					</tr>
+					<tr v-for="(contact, index) in contacts">
+						<td>
+							<template v-if="index == editContact">
+								<input type="text" v-bind:id="'edit-contact-name-'+index" v-bind:value="contact.name"> </template>
+							<template v-else> [[ contact.name ]] </template>
+						</td>
+						<td>
+							<template v-if="index == editContact">
+								<input type="text" v-bind:id="'edit-contact-relationship-'+index" v-bind:value="contact.relationship"> </template>
+							<template v-else> [[ contact.relationship ]] </template>
+						</td>
+						<td>
+							<template v-if="index == editContact">
+								<input type="text" v-bind:id="'edit-contact-phone-number-'+index" v-bind:value="contact.phone_number"> </template>
+							<template v-else> <a v-bind:href="'tel:+1'+contact.phone_number">[[ contact.phone_number ]]</a></td>
+						</template>
+						</td>
+						<td>
+							<template v-if="index == editContact">
+								<input type="text" v-bind:id="'edit-contact-email-'+index" v-bind:value="contact.email"> </template>
+							<template v-else> <a v-bind:href="'mailto:'+contact.email">
+          [[ contact.email ]]</a></template>
+						</td>
+						<td>
+							<template v-if="index == editContact">
+								<textarea v-bind:id="'edit-contact-notes-'+index">[[ contact.notes ]]</textarea>
+							</template>
+							<template v-else>[[ contact.notes ]]</template>
+						</td>
+						<td>
+							<template v-if="index == editContact">
+								<button @click="editAContact(index)">Save</button>
+							</template>
+							<template v-else>
+								<button @click="editContact = index">Edit</button>
+							</template>
+							<button @click="deleteContact(index)">X</button>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div v-else-if="is_professional"> <strong>Search:</strong> &nbsp; <strong>First name:</strong>&nbsp;
+				<input type="text" id="search-first-name"> &nbsp;<strong>Last name:</strong>&nbsp;
+				<input type="text" id="search-last-name" v-on:keyup.enter="search"> &nbsp;
+				<button @click="search">Search</button>
+				<table v-if="search_results.length > 0">
+					<tr>
+						<th></th>
+						<th>First name</th>
+						<th>Middle name</th>
+						<th>Last name</th>
+					</tr>
+					<tr v-for="person in search_results">
+						<td><a href="#" @click="getProfile(person.id)">Open</a></td>
+						<td>[[ person.first_name ]]</td>
+						<td>[[ person.middle_name ]]</td>
+						<td>[[ person.last_name ]]</td>
+					</tr>
         </table>
-    </div>
-  </div>
+        <template v-if="is_admin">
+          <h3>Approved domains</h3>
+          <strong>Add domain</strong> <input type="text" id="add-professional-domain" v-on:keyup.enter="addProfessionalDomain"> <button @click="addProfessionalDomain">Add domain</button>
+          <ul>
+            <li v-for="domain in approved_professional_domains">[[ domain ]]</li>
+          </ul>
+        </template>
+			</div>
+		</div>
 	</div>
 </body>
 

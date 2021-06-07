@@ -12,6 +12,8 @@ import sqlalchemy
 import datetime
 import json
 from sqlalchemy.orm.attributes import flag_modified
+from flask import current_app as app, flash, redirect, render_template, session
+from flask_login import login_manager, login_required, logout_user
 
 app = Flask(__name__, static_url_path="", static_folder="static")
 
@@ -28,6 +30,7 @@ from flask_login import LoginManager
 from flask_login import login_user
 from flask_login import current_user
 from flask_login import UserMixin
+from flask_login import login_required
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -75,6 +78,7 @@ class User(UserMixin, db.Model):
     emailed_verification_code = db.Column(db.String(), nullable=True)
     datetime_verification_code_created = db.Column(db.DateTime, server_default=sqlalchemy.sql.func.now())
     is_professional = db.Column(db.Boolean(), default=False)
+    is_admin = db.Column(db.Boolean(), default=False)
     person_id = db.Column(UUID(as_uuid=True), db.ForeignKey('people.id'), nullable=True)
     job_title = db.Column(db.String(), nullable=True)
     organization = db.Column(db.String(), nullable=True)
@@ -88,32 +92,15 @@ class User(UserMixin, db.Model):
         self.agency = agency
 
     def to_json(self):      
-        print(Person.query.filter_by(id=self.person_id).first() ) 
         person_query = Person.query.filter_by(id=self.person_id)
         data = {"email_address": self.email_address}
+        data['is_professional'] = self.is_professional
+        data['is_admin'] = self.is_admin
+        data['person_id'] = None
+
         if person_query.scalar():
             person = person_query.first()
-            data['id'] = person.id
-            data['first_name'] = person.first_name
-            data['middle_name'] = person.middle_name
-            data['last_name'] = person.last_name
-            data['preferred_name'] = person.preferred_name
-            data['preferred_gender_pronouns'] = person.preferred_gender_pronouns
-            data['date_of_birth'] = person.date_of_birth.strftime("%B %-d, %Y")
-            data['age'] = calculate_age(person.date_of_birth.date())
-            data['contacts'] = person.contacts
-            data['persons_phone_numbers'] = person.persons_phone_numbers
-            data['current_physical_living_address_1'] = person.current_physical_living_address_1
-            data['current_physical_living_address_2'] = person.current_physical_living_address_2
-            data['current_physical_living_address_city'] = person.current_physical_living_address_city
-            data['current_physical_living_address_state'] = person.current_physical_living_address_state
-            data['current_physical_living_address_zip_code'] = person.current_physical_living_address_zip_code
-            data['coping_techniques_to_use_before_calling_for_help'] = person.coping_techniques_to_use_before_calling_for_help
-            data['medications'] = person.medications
-            data['safety_information'] = person.safety_information
-            data['mental_health_treatment_summary'] = person.mental_health_treatment_summary 
-            data['medication_notes'] = person.medication_notes
-            data['appointments'] = person.appointments
+            data['person_id'] = person.id
         return data
 
     def is_authenticated(self):
@@ -183,18 +170,39 @@ class Person(db.Model):
     medication_notes = db.Column(db.String(), nullable=True)
     preferred_psychiatric_inpatient_facility = db.Column(db.String(), nullable=True)
     pets = db.Column(JSON(), nullable=True)
-    
+    promises_made_to_person = db.Column(JSON(), nullable=True)
+    stressors = db.Column(JSON(), nullable=True)
+
+    def to_json(self):
+        data = {}
+        data['id'] = self.id
+        data['first_name'] = self.first_name
+        data['middle_name'] = self.middle_name
+        data['last_name'] = self.last_name
+        data['preferred_name'] = self.preferred_name
+        data['preferred_gender_pronouns'] = self.preferred_gender_pronouns
+        data['date_of_birth'] = self.date_of_birth.strftime("%B %-d, %Y")
+        data['age'] = calculate_age(self.date_of_birth.date())
+        data['contacts'] = self.contacts
+        data['persons_phone_numbers'] = self.persons_phone_numbers
+        data['current_physical_living_address_1'] = self.current_physical_living_address_1
+        data['current_physical_living_address_2'] = self.current_physical_living_address_2
+        data['current_physical_living_address_city'] = self.current_physical_living_address_city
+        data['current_physical_living_address_state'] = self.current_physical_living_address_state
+        data['current_physical_living_address_zip_code'] = self.current_physical_living_address_zip_code
+        data['coping_techniques_to_use_before_calling_for_help'] = self.coping_techniques_to_use_before_calling_for_help
+        data['medications'] = self.medications
+        data['safety_information'] = self.safety_information
+        data['mental_health_treatment_summary'] = self.mental_health_treatment_summary 
+        data['medication_notes'] = self.medication_notes
+        data['appointments'] = self.appointments
+        return data
+
+
+
 @app.route("/static/<path:path>")
 def send_static(path):
     return send_from_directory("static", path)
-
-@app.route("/for_first_responders", methods=["GET"])
-def first_responder_home():
-    return render_template(
-        "for_first_responders.html",
-        polly_api_key=os.getenv('POLLY_API_KEY'),
-        google_maps_api_key=os.getenv('GOOGLE_MAPS_API_KEY')
-    )
 
 
 
@@ -202,40 +210,56 @@ def first_responder_home():
 @app.route("/send_login_email", methods=["POST"])
 def send_login_email():
     email_address = request.form['email']
+    if os.environ.get('IS_DEV_AUTO_LOGIN', False) == 'true':
+        email_address = os.environ.get('AUTO_LOGIN_EMAIL')
     verification_token = create_random_string()
-    does_email_exist = db.session.query(User.id).filter_by(email_address=request.form['email']).scalar() is not None
+    does_email_exist = db.session.query(User.id).filter_by(email_address=email_address).scalar() is not None
     if does_email_exist:
         user = User.query.filter_by(email_address=email_address).first()
         user.emailed_verification_code = verification_token
         user.datetime_verification_code_created = datetime.datetime.utcnow()
-        db.session.commit()
     else:
         user = User(email_address, verification_token, None, None, None, None)
         db.session.add(user)
-        db.session.commit()
+    user.is_professional = True if ApprovedWorkEmailAddressDomain.query.filter_by(email_address_domain=email_address[email_address.index('@')+1:]).scalar() else False
+    db.session.commit()
     if os.environ.get('IS_DEV_AUTO_LOGIN', False) == 'true':
         return jsonify("email sent")
     email = requests.post(
         "https://api.mailgun.net/v3/%s/messages" % (os.getenv("API_EMAIL_DOMAIN_NAME")),
         auth=("api", "%s" % (os.getenv("MAILGUN_API_KEY"))),
         data={
-            "from": "SafetyHealth.cloud <no-reply@%s>"
+            "from": "Crisis Profile <no-reply@%s>"
             % (os.getenv("API_EMAIL_DOMAIN_NAME")),
             "to": ["%s" % (request.form.get('email'))],
-            "subject": "Login code for SafetyHealth.cloud",
-            "text": 'Hi! This is a login email for SafetyHealth.cloud. Enter the code: %s on SafetyHealth.cloud'
+            "subject": "Login code for Crisis Profile",
+            "text": 'Hi! This is a login email for logging into Crisis Profile. Enter the code: %s on crisisprofile.com'
             % (
                 verification_token,
             ),
         },
     ).text
+    print(email)
     return jsonify("email sent")
 
 @login_manager.user_loader
 def load_user(userid):
     return User.query.filter_by(id=userid).first()
 
+@app.route('/get_profile', methods=['GET'])
+@login_required
+def get_profile():
+    person_query = Person.query.filter_by(id=request.args['person_id']).first()
+    return jsonify(person_query.to_json())
+
+@app.route('/get_approved_professionals', methods=['GET'])
+@login_required
+def get_approved_professionals():
+    data = {'domains': [row.email_address_domain for row in ApprovedWorkEmailAddressDomain.query.all()]}
+    return jsonify(data)
+
 @app.route('/edit_basic_information', methods=['POST'])
+@login_required
 def edit_basic_information():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
@@ -267,14 +291,24 @@ def edit_basic_information():
     return jsonify(above_elements)
 
 @app.route('/edit_safety_information', methods=['POST'])
+@login_required
 def edit_safety_information():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
     person.safety_information = request.form['safety_information']
     db.session.commit()
     return jsonify({'safety_information': person.safety_information})
+from sqlalchemy import and_, or_, not_
+
+@app.route('/search', methods=['GET'])
+@login_required
+def search():
+    people = [{'id': person.id, 'first_name': person.first_name, 'middle_name': person.middle_name, 'last_name': person.last_name} for person in Person.query.filter(and_(Person.first_name.ilike(request.args['first_name']), Person.last_name.ilike(request.args['last_name'])))]
+    return jsonify(people)
+
 
 @app.route('/edit_precall_coping', methods=['POST'])
+@login_required
 def edit_precall_coping():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
@@ -283,6 +317,7 @@ def edit_precall_coping():
     return jsonify({'coping_techniques_to_use_before_calling_for_help': person.coping_techniques_to_use_before_calling_for_help})
 
 @app.route('/edit_mental_health_treatment', methods=['POST'])
+@login_required
 def edit_mental_health_treatment():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
@@ -291,6 +326,7 @@ def edit_mental_health_treatment():
     return jsonify({'mental_health_treatment_summary': person.mental_health_treatment_summary})
 
 @app.route('/edit_medication_notes', methods=['POST'])
+@login_required
 def edit_medication_notes():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
@@ -300,6 +336,7 @@ def edit_medication_notes():
 
 
 @app.route('/add_medication', methods=['POST'])
+@login_required
 def add_medication():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
@@ -314,6 +351,7 @@ def add_medication():
     return jsonify(medications)
 
 @app.route('/delete_medication', methods=['POST'])
+@login_required
 def delete_medication():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
@@ -326,7 +364,21 @@ def delete_medication():
     return jsonify(medications)
 
 
+@app.route('/delete_appointment', methods=['POST'])
+@login_required
+def delete_appointment():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    appointments = person.appointments
+    del appointments[int(request.form['index'])]
+    person.appointments = appointments
+    flag_modified(person, "appointments")
+    db.session.commit()
+    return jsonify(appointments)
+
+
 @app.route('/add_appointment', methods=['POST'])
+@login_required
 def add_appointment():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
@@ -341,6 +393,7 @@ def add_appointment():
     return jsonify(appointments)
 
 @app.route('/delete_contact', methods=['POST'])
+@login_required
 def delete_contact():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
@@ -352,6 +405,7 @@ def delete_contact():
     return jsonify(contacts)    
 
 @app.route('/add_contact', methods=['POST'])
+@login_required
 def add_contact():
     print('form: ', request.form, request.method)
     person_uuid = request.form['person_uuid']
@@ -364,6 +418,7 @@ def add_contact():
     return jsonify(contacts)
 
 @app.route('/edit_contact', methods=['POST'])
+@login_required
 def edit_contact():
     print('form: ', request.form, request.method)
     person_uuid = request.form['person_uuid']
@@ -382,7 +437,7 @@ def login():
         user_query = User.query.filter_by(email_address=email_address)
     else:
         info = request.form
-        email_address = info['email_address']
+        email_address = info['email_address'].strip()
         code = info['code'].strip()
         user_query = User.query.filter_by(email_address=email_address, emailed_verification_code=code) # remove for production
     if user_query.scalar():
@@ -395,9 +450,20 @@ def login():
         return jsonify({"status": 401,
                         "reason": "Code is not correct"})
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    if session.get('was_once_logged_in'):
+        # prevent flashing automatically logged out message
+        del session['was_once_logged_in']
+    flash('You have successfully logged yourself out.')
+    return redirect('/')
+
 @app.route('/user_info', methods=['POST'])
 def user_info():
     if current_user.is_authenticated:
+        print(current_user)
         resp = {"result": 200,
                 "data": current_user.to_json()}
     else:
@@ -413,6 +479,13 @@ def home():
         google_maps_api_key=os.getenv('GOOGLE_MAPS_API_KEY')
     )
 
+@app.route('/add_professional_domain', methods=["POST"])
+@login_required
+def add_professional_domain():
+    domain = ApprovedWorkEmailAddressDomain(request.form['domain'])
+    db.session.add(domain)
+    db.session.commit()
+    return jsonify([row.email_address_domain for row in ApprovedWorkEmailAddressDomain.query.all()])
 
 if __name__ == "__main__":
     app.run(port=9000, debug=True)
