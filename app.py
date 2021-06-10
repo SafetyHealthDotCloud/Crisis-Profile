@@ -117,11 +117,11 @@ class User(UserMixin, db.Model):
     def get_id(self):         
         return str(self.id)    
 
-
+import uuid
 class Person(db.Model):
     __tablename__ = 'people'
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True, server_default=sqlalchemy.text("uuid_generate_v4()"), unique=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, server_default=sqlalchemy.text("uuid_generate_v4()"), unique=True)
     first_name = db.Column(db.String())
     middle_name = db.Column(db.String(), nullable=True)
     last_name = db.Column(db.String())
@@ -176,6 +176,13 @@ class Person(db.Model):
     stressors = db.Column(JSON(), nullable=True)
     diagnoses = db.Column(JSON(), nullable=True)
     bio = db.Column(db.String(), nullable=True)
+
+    def __init__(self, first_name, middle_name, last_name, birthdate):
+        self.first_name = first_name
+        self.middle_name = middle_name
+        self.last_name = last_name
+        from datetime import datetime
+        self.date_of_birth = datetime.strptime(birthdate, "%m/%d/%Y").date()
 
     def to_json(self):
         data = {}
@@ -243,7 +250,6 @@ def send_login_email():
             ),
         },
     ).text
-    print(email)
     return jsonify("email sent")
 
 @login_manager.user_loader
@@ -349,6 +355,16 @@ def edit_medication_notes():
     db.session.commit()
     return jsonify({'medication_notes': person.medication_notes})
 
+@app.route('/add_person', methods=['POST'])
+@login_required
+def add_person():
+    print('birth date', request.form['birth_date'])
+    person = Person(request.form['first_name'], request.form['middle_name'], request.form['last_name'], request.form['birth_date'])
+    db.session.add(person)
+    db.session.commit()
+
+    return jsonify({'person_uuid': person.id})
+
 
 @app.route('/add_medication', methods=['POST'])
 @login_required
@@ -359,7 +375,6 @@ def add_medication():
     if not medications:
         medications = []
     medications.append({'name': request.form['name'], 'tablet_size': request.form['tablet_size'], 'instructions': request.form['instructions']})
-    print('medications', list(medications))
     person.medications = medications
     flag_modified(person, "medications")
     db.session.commit()
@@ -372,7 +387,6 @@ def delete_medication():
     person = Person.query.get(person_uuid)
     medications = person.medications
     del medications[int(request.form['index'])]
-    print(medications)
     person.medications = medications
     flag_modified(person, "medications")
     db.session.commit()
@@ -422,7 +436,6 @@ def delete_contact():
 @app.route('/add_contact', methods=['POST'])
 @login_required
 def add_contact():
-    print('form: ', request.form, request.method)
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
     contacts = person.contacts
@@ -442,7 +455,6 @@ def edit_contact():
     person.contacts = contacts
     flag_modified(person, "contacts")
     db.session.commit()
-    print(contacts[-1])
     return jsonify(contacts)    
 
 @app.route('/login', methods=['POST'])
@@ -478,7 +490,6 @@ def logout():
 @app.route('/user_info', methods=['POST'])
 def user_info():
     if current_user.is_authenticated:
-        print(current_user)
         resp = {"result": 200,
                 "data": current_user.to_json()}
     else:

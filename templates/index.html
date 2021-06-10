@@ -226,6 +226,17 @@
 							app.search_results = data
 						})
 					},
+					addPerson: function(event) {
+						$.post('/add_person', {
+							'first_name': $('#add-person-first-name').val(),
+							'middle_name': $('#add-person-middle-name').val(),
+							'last_name': $('#add-person-last-name').val(),
+							'birth_date': $('#add-person-birth-date').val(),
+
+						}, function(data) {
+							app.person_uuid = data.person_uuid
+						})
+					},
 					editBasicInformation: function(data) {
 						$.post('/edit_basic_information', {
 							"person_uuid": app.person_uuid,
@@ -398,7 +409,7 @@
 <body>
 	<div id="app">
 		<div id="header"> <span style="float:right" v-if="loggedIn"><a href="/logout">Logout</a> | [[ usersLoggedInEmail ]]</span>
-			<h1>Crisis Profile (early prototype) by <a href="https://crisisresponse.services">Crisis Response Services</a><span> A care coordination app to effective help with mental illness</span></h1> </div>
+			<h1>Crisis Profile (early functioning prototype Do not put real data in the app if you worry about it getting leaked) by <a href="https://crisisresponse.services">Crisis Response Services</a><span> A care coordination app to effective help with mental illness</span></h1> </div>
 		<div id="main">
 			<div v-if="!loggedIn">
 				<h3>Login</h3>
@@ -501,7 +512,7 @@
 
       </h3>
 				<template v-if="isEditMentalHealthTreatment">
-					<textarea id="edit-mental-health-treatment-summary" style="width:100%;height:30px;">[[ mental_health_treatment_summary ]]</textarea>
+					<textarea id="edit-mental-health-treatment-summary" style="width:100%;height:200px;">[[ mental_health_treatment_summary ]]</textarea>
 				</template>
 				<template v-else> <pre>[[ mental_health_treatment_summary ]]</pre></template>
 				<h3 id="medications">Medications</h3>
@@ -568,7 +579,7 @@
 						</td>
 					</tr>
 				</table> 
-				<h3 id="contacts">Contacts ([[ contacts.length ]])</h3> <strong>Name:</strong>
+				<h3 id="contacts">Contacts (<template v-if="contacts">[[ contacts.length ]]</template>)</h3> <strong>Name:</strong>
 				<input type="text" id="add_contact_name" /> <strong>Relationship:</strong>
 				<input type="text" id="add_contact_relationship" /> <strong>Phone number:</strong>
 				<input type="text" id="add_contact_phone_number" /> <strong>Email:</strong>
@@ -634,7 +645,15 @@
 					</tr>
 				</table>
 			</div>
-			<div v-else-if="is_professional"> <strong>Search:</strong> &nbsp; <strong>First name:</strong>&nbsp;
+			<div v-else-if="is_professional"> 
+				<h3>Add person</h3>
+				<strong>First name:</strong> <input type="text" id="add-person-first-name"> 
+				<strong>Middle name:</strong> <input type="text" id="add-person-middle-name"> 
+				<strong>Last name:</strong> <input type="text" id="add-person-last-name"> 
+				<strong>Birthdate (MM/DD/YYYY):</strong> <input type="text" id="add-person-birth-date"> 
+				
+				<button @click="addPerson()">Add person</button>
+				<h3>Search</h3> &nbsp; <strong>First name:</strong>&nbsp;
 				<input type="text" id="search-first-name"> &nbsp;<strong>Last name:</strong>&nbsp;
 				<input type="text" id="search-last-name" v-on:keyup.enter="search"> &nbsp;
 				<button @click="search">Search</button>
