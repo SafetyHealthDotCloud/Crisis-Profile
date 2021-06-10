@@ -82,7 +82,8 @@ class User(UserMixin, db.Model):
     person_id = db.Column(UUID(as_uuid=True), db.ForeignKey('people.id'), nullable=True)
     job_title = db.Column(db.String(), nullable=True)
     organization = db.Column(db.String(), nullable=True)
-    
+    bookmarked_people = db.Column(JSON(), nullable=True)
+
     def __init__(self, email_address, emailed_verification_code, is_professional, person_id, job_title, agency):
         self.email_address = email_address
         self.emailed_verification_code = emailed_verification_code
@@ -97,6 +98,7 @@ class User(UserMixin, db.Model):
         data['is_professional'] = self.is_professional
         data['is_admin'] = self.is_admin
         data['person_id'] = None
+        data['bookmarked_people'] = [{'id': person.id, 'first_name': person.first_name, 'middle_name': person.middle_name, 'last_name': person.last_name} for person in db.session.query(Person).filter(Person.id.in_(self.bookmarked_people)).all()]
 
         if person_query.scalar():
             person = person_query.first()
@@ -172,6 +174,8 @@ class Person(db.Model):
     pets = db.Column(JSON(), nullable=True)
     promises_made_to_person = db.Column(JSON(), nullable=True)
     stressors = db.Column(JSON(), nullable=True)
+    diagnoses = db.Column(JSON(), nullable=True)
+    bio = db.Column(db.String(), nullable=True)
 
     def to_json(self):
         data = {}
@@ -257,6 +261,17 @@ def get_profile():
 def get_approved_professionals():
     data = {'domains': [row.email_address_domain for row in ApprovedWorkEmailAddressDomain.query.all()]}
     return jsonify(data)
+
+@app.route('/bookmark_this_person', methods=['POST'])
+@login_required
+def bookmark_this_person():
+    user = current_user
+    if not user.bookmarked_people:
+        user.bookmarked_people = []
+    user.bookmarked_people.append(request.form['person_uuid'])
+    flag_modified(user, "bookmarked_people")
+    db.session.commit()
+    return jsonify({'successful': True})
 
 @app.route('/edit_basic_information', methods=['POST'])
 @login_required
@@ -420,14 +435,14 @@ def add_contact():
 @app.route('/edit_contact', methods=['POST'])
 @login_required
 def edit_contact():
-    print('form: ', request.form, request.method)
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
     contacts = person.contacts
-    contacts[int(request.form['index'])] = {'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes']}
+    contacts[int(request.form['index'])] = {'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes'], 'is_professional': True if request.form['is_professional'] == 'true' else False}
     person.contacts = contacts
     flag_modified(person, "contacts")
     db.session.commit()
+    print(contacts[-1])
     return jsonify(contacts)    
 
 @app.route('/login', methods=['POST'])

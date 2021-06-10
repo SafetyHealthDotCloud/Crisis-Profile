@@ -17,7 +17,9 @@
 	h3 {
 		margin: 10px 0;
 	}
-	
+	.professional {
+		background:yellow
+	}
 	pre {
 		width: 100%;
 		display: block;
@@ -115,6 +117,7 @@
           app.is_admin = data.data.is_admin
 					app.usersLoggedInEmail = data.data.email_address
 					app.loggedIn = true
+					app.bookmarked_people = data.data.bookmarked_people
 					if(data.data.person_id) {
 						app.getProfile(data.data.person_id)
 					}
@@ -150,6 +153,7 @@
 						isEditMedicationNotes: false,
 						appointments: [],
 						person_uuid: null,
+						bookmarked_people: [],
             is_admin: false,
             approved_professional_domains: [],
 					}
@@ -194,6 +198,9 @@
 							app.medication_notes = data.medication_notes
 							app.appointments = data.appointments
 						});
+					},
+					bookmarkThisPerson: function(event) {
+						$.post('/bookmark_this_person', {'person_uuid': app.person_uuid})
 					},
 					sendLoginEmail: function(event) {
 						this.email = $('#login_email').val();
@@ -357,6 +364,7 @@
 						})
 					},
 					editAContact: function(index) {
+						console.log($('#edit-contact-is-professional-' + index).val())
 						$.post('/edit_contact', {
 							"person_uuid": app.person_uuid,
 							"index": index,
@@ -364,7 +372,8 @@
 							"relationship": $('#edit-contact-relationship-' + index).val(),
 							"phone_number": $('#edit-contact-phone-number-' + index).val(),
 							"email": $('#edit-contact-email-' + index).val(),
-							"notes": $('#edit-contact-notes-' + index).val()
+							"notes": $('#edit-contact-notes-' + index).val(),
+							"is_professional": $('#edit-contact-is-professional-' + index).is(':checked'),
 						}, function(data) {
 							app.editContact = -1;
 							app.contacts = data;
@@ -389,7 +398,7 @@
 <body>
 	<div id="app">
 		<div id="header"> <span style="float:right" v-if="loggedIn"><a href="/logout">Logout</a> | [[ usersLoggedInEmail ]]</span>
-			<h1>Crisis Profile by <a href="https://crisisresponse.services">Crisis Response Services</a><span> A care coordination app to help people in crisis</span></h1> </div>
+			<h1>Crisis Profile (early prototype) by <a href="https://crisisresponse.services">Crisis Response Services</a><span> A care coordination app to effective help with mental illness</span></h1> </div>
 		<div id="main">
 			<div v-if="!loggedIn">
 				<h3>Login</h3>
@@ -404,7 +413,10 @@
 				</div>
 			</div>
 			<div v-else-if="person_uuid">
-				<button @click="person_uuid = null">Back to people list</button>
+				<template v-if="is_professional">
+					<button @click="person_uuid = null">Back to people list</button>
+					<button @click="bookmarkThisPerson">Bookmark this person</button>
+				</template>
 				<br/>
 				<template v-if="isEditBasicInformation">
 					<button @click="editBasicInformation()">Save basic information</button>
@@ -450,7 +462,7 @@
 				<h3>Table of contents</h3>
 				<ul id="toc">
 					<li><a href="#safety-information">Safety Information</a></li>
-					<li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911</a></li>
+					<li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)</a></li>
 					<li><a href="#mental-health-treatment-summary">Mental health treatment summary</a></li>
 					<li><a href="#medications">Medications</a></li>
 					<li><a href="#appointments">Appointments</a></li>
@@ -465,7 +477,7 @@
 					<textarea id="edit-safety-information" style="width:100%;height:200px;">[[ safety_information ]]</textarea>
 				</template>
 				<template v-else> <pre>[[ safety_information ]]</pre> </template>
-				<h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 
+				<h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)
         <template v-if="isEditPrecallCoping">
           <button @click="editPrecallCoping">Save edit</button>
         </template>
@@ -474,10 +486,10 @@
         </template>
       </h3>
 				<template v-if="isEditPrecallCoping">
-					<textarea id="edit-precall-coping" style="width:100%;height:30px;">[[ coping_techniques_to_use_before_calling_for_help ]]</textarea>
+					<textarea id="edit-precall-coping" style="width:100%;height:200px;">[[ coping_techniques_to_use_before_calling_for_help ]]</textarea>
 				</template>
 				<template v-else>
-					<p>[[ coping_techniques_to_use_before_calling_for_help ]]</p>
+					<pre>[[ coping_techniques_to_use_before_calling_for_help ]]</pre>
 				</template>
 				<h3 id="mental_health_treatment_summary">Mental health treatment summary
         <template v-if="isEditMentalHealthTreatment">
@@ -555,8 +567,8 @@
 							<button @click="deleteEvent(index)">X</button>
 						</td>
 					</tr>
-				</table> <pre>[[ medication_notes ]]</pre></template>
-				<h3 id="contacts">Contacts</h3> <strong>Name:</strong>
+				</table> 
+				<h3 id="contacts">Contacts ([[ contacts.length ]])</h3> <strong>Name:</strong>
 				<input type="text" id="add_contact_name" /> <strong>Relationship:</strong>
 				<input type="text" id="add_contact_relationship" /> <strong>Phone number:</strong>
 				<input type="text" id="add_contact_phone_number" /> <strong>Email:</strong>
@@ -570,9 +582,10 @@
 						<th>Phone number</th>
 						<th>Email</th>
 						<th>Notes</th>
+						<th>Is professional who is involved in his care</th>
 						<th></th>
 					</tr>
-					<tr v-for="(contact, index) in contacts">
+					<tr v-for="(contact, index) in contacts" v-bind:class="{professional: contact.is_professional}">
 						<td>
 							<template v-if="index == editContact">
 								<input type="text" v-bind:id="'edit-contact-name-'+index" v-bind:value="contact.name"> </template>
@@ -603,6 +616,14 @@
 						</td>
 						<td>
 							<template v-if="index == editContact">
+								<input type="checkbox" v-bind:checked="contact.is_professional" v-bind:id="'edit-contact-is-professional-'+index">
+							</template>
+							<template v-if="contact.is_professional">
+								Professional
+							</template>
+						</td>
+						<td>
+							<template v-if="index == editContact">
 								<button @click="editAContact(index)">Save</button>
 							</template>
 							<template v-else>
@@ -630,7 +651,22 @@
 						<td>[[ person.middle_name ]]</td>
 						<td>[[ person.last_name ]]</td>
 					</tr>
-        </table>
+		</table>
+		<h3>Bookmarked people</h3>
+		<table v-if="bookmarked_people.length > 0">
+			<tr>
+				<th></th>
+				<th>First name</th>
+				<th>Middle name</th>
+				<th>Last name</th>
+			</tr>
+			<tr v-for="person in bookmarked_people">
+				<td><a href="#" @click="getProfile(person.id)">Open</a></td>
+				<td>[[ person.first_name ]]</td>
+				<td>[[ person.middle_name ]]</td>
+				<td>[[ person.last_name ]]</td>
+			</tr>
+</table>
         <template v-if="is_admin">
           <h3>Approved domains</h3>
           <strong>Add domain</strong> <input type="text" id="add-professional-domain" v-on:keyup.enter="addProfessionalDomain"> <button @click="addProfessionalDomain">Add domain</button>
