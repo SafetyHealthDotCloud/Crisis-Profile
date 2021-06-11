@@ -62,7 +62,7 @@ class ApprovedWorkEmailAddress(db.Model):
 
     email_address = db.Column(db.String(), primary_key=True)
 
-    def __init__(self, email_address_domain):
+    def __init__(self, email_address):
         self.email_address = email_address
 
 from datetime import date, timedelta
@@ -98,7 +98,10 @@ class User(UserMixin, db.Model):
         data['is_professional'] = self.is_professional
         data['is_admin'] = self.is_admin
         data['person_id'] = None
-        data['bookmarked_people'] = [{'id': person.id, 'first_name': person.first_name, 'middle_name': person.middle_name, 'last_name': person.last_name} for person in db.session.query(Person).filter(Person.id.in_(self.bookmarked_people)).all()]
+        data['bookmarked_people'] = []
+        bookmarked_people = db.session.query(Person).filter(Person.id.in_(self.bookmarked_people if self.bookmarked_people else [])).all()
+        if bookmarked_people:
+            data['bookmarked_people'] = [{'id': person.id, 'first_name': person.first_name, 'middle_name': person.middle_name, 'last_name': person.last_name} for person in bookmarked_people]
 
         if person_query.scalar():
             person = person_query.first()
@@ -233,6 +236,8 @@ def send_login_email():
         user = User(email_address, verification_token, None, None, None, None)
         db.session.add(user)
     user.is_professional = True if ApprovedWorkEmailAddressDomain.query.filter_by(email_address_domain=email_address[email_address.index('@')+1:]).scalar() else False
+    if ApprovedWorkEmailAddress.query.filter_by(email_address=email_address).scalar():
+        user.is_professional = True
     db.session.commit()
     if os.environ.get('IS_DEV_AUTO_LOGIN', False) == 'true':
         return jsonify("email sent")
@@ -266,6 +271,7 @@ def get_profile():
 @login_required
 def get_approved_professionals():
     data = {'domains': [row.email_address_domain for row in ApprovedWorkEmailAddressDomain.query.all()]}
+    data['email_addresses'] = [row.email_address for row in ApprovedWorkEmailAddress.query.all()]
     return jsonify(data)
 
 @app.route('/bookmark_this_person', methods=['POST'])
@@ -512,6 +518,15 @@ def add_professional_domain():
     db.session.add(domain)
     db.session.commit()
     return jsonify([row.email_address_domain for row in ApprovedWorkEmailAddressDomain.query.all()])
+
+@app.route('/add_professional_email_address', methods=["POST"])
+@login_required
+def add_professional_email_address():
+    email = ApprovedWorkEmailAddress(request.form['email'])
+    db.session.add(email)
+    db.session.commit()
+    return jsonify([row.email_address for row in ApprovedWorkEmailAddress.query.all()])
+
 
 if __name__ == "__main__":
     app.run(port=9000, debug=True)

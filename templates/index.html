@@ -9,407 +9,423 @@
 	<script src="https://unpkg.com/vue@next"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha512-NmLkDIU1C/C88wi324HBc+S2kLhi08PN5GDeUVVVC/BVt/9Izdsc9SVeVfA1UZbY3sHUlDSyRXhCzHfr6hmPPw==" crossorigin="anonymous" />
 	<style>
-	body {
-		font-family: sans-serif;
-		margin: 0;
-	}
-	
-	h3 {
-		margin: 10px 0;
-	}
-	.professional {
-		background:yellow
-	}
-	pre {
-		width: 100%;
-		display: block;
-		white-space: pre-wrap;
-		/* Since CSS 2.1 */
-		white-space: -moz-pre-wrap;
-		/* Mozilla, since 1999 */
-		white-space: -pre-wrap;
-		/* Opera 4-6 */
-		white-space: -o-pre-wrap;
-		/* Opera 7 */
-		word-wrap: break-word;
-		/* Internet Explorer 5.5+ */
-	}
-	
-	#header,
-	#main {
-		padding: 10px;
-	}
-	
-	#header {
-		border-bottom: 1px solid red;
-	}
-	
-	h1 {
-		display: inline;
-		font-size: 1.25em;
-		color: red
-	}
-	
-	h2 {
-		font-size: 1.15em
-	}
-	
-	h1 span {
-		font-size: .75em;
-		color: gray;
-	}
-	
-	strong,
-	th,
-	h1,
-	h2,
-	h3,
-	h4 {
-		font-weight: bold
-	}
-	
-	h4 {
-		font-style: italic
-	}
-	
-	h3,
-	h4,
-	p,
-	pre,
-	#toc,
-	table {
-		margin-bottom: 10px
-	}
-	
-	#toc {
-		list-style-type: square;
-		padding-left: 20px
-	}
-	
-	table {
-		border-collapse: collapse;
-	}
-	
-	#contacts input,
-	#contacts textarea {
-		width: 100%;
-	}
-	
-	#contacts textarea {
-		height: 100%
-	}
-	
-	th,
-	td {
-		border: 1px solid #000;
-		text-align: left;
-		padding: 5px;
-		vertical-align: top;
-	}
+		body {
+			font-family: sans-serif;
+			margin: 0;
+		}
+		
+		h3 {
+			margin: 10px 0;
+		}
+		
+		.professional {
+			background: yellow
+		}
+		
+		pre {
+			width: 100%;
+			display: block;
+			white-space: pre-wrap;
+			/* Since CSS 2.1 */
+			white-space: -moz-pre-wrap;
+			/* Mozilla, since 1999 */
+			white-space: -pre-wrap;
+			/* Opera 4-6 */
+			white-space: -o-pre-wrap;
+			/* Opera 7 */
+			word-wrap: break-word;
+			/* Internet Explorer 5.5+ */
+		}
+		
+		#header,
+		#main {
+			padding: 10px;
+		}
+		
+		#header {
+			border-bottom: 1px solid red;
+		}
+		
+		h1 {
+			display: inline;
+			font-size: 1.25em;
+			color: red
+		}
+		
+		h2 {
+			font-size: 1.15em
+		}
+		
+		h1 span {
+			font-size: .75em;
+			color: gray;
+		}
+		
+		strong,
+		th,
+		h1,
+		h2,
+		h3,
+		h4 {
+			font-weight: bold
+		}
+		
+		h4 {
+			font-style: italic
+		}
+		
+		h3,
+		h4,
+		p,
+		pre,
+		#toc,
+		table {
+			margin-bottom: 10px
+		}
+		
+		#toc {
+			list-style-type: square;
+			padding-left: 20px
+		}
+		
+		table {
+			border-collapse: collapse;
+		}
+		
+		#contacts input,
+		#contacts textarea {
+			width: 100%;
+		}
+		
+		#contacts textarea {
+			height: 100%
+		}
+		
+		th,
+		td {
+			border: 1px solid #000;
+			text-align: left;
+			padding: 5px;
+			vertical-align: top;
+		}
 	</style>
 	<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 	<script>
-	$(function() {
-		function updateUserInfo() {
-			$.post('/user_info', function(data) {
-				if(data.result == 200) {
-					app.is_professional = data.data.is_professional
-          app.is_admin = data.data.is_admin
-					app.usersLoggedInEmail = data.data.email_address
-					app.loggedIn = true
-					app.bookmarked_people = data.data.bookmarked_people
-					if(data.data.person_id) {
-						app.getProfile(data.data.person_id)
+		$(function() {
+			function updateUserInfo() {
+				$.post('/user_info', function(data) {
+					if(data.result == 200) {
+						app.is_professional = data.data.is_professional
+						app.is_admin = data.data.is_admin
+						app.usersLoggedInEmail = data.data.email_address
+						app.loggedIn = true
+						app.bookmarked_people = data.data.bookmarked_people
+						if(data.data.person_id) {
+							app.getProfile(data.data.person_id)
+						}
+						if(app.is_admin) {
+							app.getApprovedProfessionals()
+						}
+					} else {
+						app.loggedIn = false;
 					}
-          if (app.is_admin) {
-            app.getApprovedProfessionals()
-          }
-				} else {
-					app.loggedIn = false;
-				}
-			})
-		}
-		const App = {
-			data() {
-					return {
-						sentLoginEmail: false,
-						email: '',
-						loggedIn: false,
-						search_results: [],
-						usersLoggedInEmail: '',
-						first_name: '',
-						middle_name: '',
-						last_name: '',
-						date_of_birth: '',
-						age: '',
-						persons_phone_numbers: [],
-						contacts: [],
-						medications: [],
-						editContact: -1,
-						isEditBasicInformation: false,
-						isEditSafetyInformation: false,
-						isEditPrecallCoping: false,
-						isEditMentalHealthTreatment: false,
-						isEditMedicationNotes: false,
-						appointments: [],
-						person_uuid: null,
-						bookmarked_people: [],
-            is_admin: false,
-            approved_professional_domains: [],
-					}
-				},
-				created: function() {
-					updateUserInfo()
-				},
-				methods: {
-          getApprovedProfessionals: function() {
-            $.get('/get_approved_professionals', function(data) {
-              console.log(JSON.stringify(data))
-              app.approved_professional_domains = data.domains
-            })
-          },
-					getProfile: function(person_id) {
-						$.get('/get_profile', {
-							'person_id': person_id
-						}, function(data) {
-							app.person_uuid = data.id
-							app.first_name = data.first_name
-							app.middle_name = data.middle_name
-							app.last_name = data.last_name
-							app.preferred_name = data.preferred_name
-							app.preferred_gender_pronouns = data.preferred_gender_pronouns
-							app.date_of_birth = data.date_of_birth
-							app.age = data.age
-							app.persons_phone_numbers = data.persons_phone_numbers
-							app.contacts = data.contacts
-							app.current_physical_living_address_1 = data.current_physical_living_address_1
-							if(data.current_physical_living_address_2) {
+				})
+			}
+			const App = {
+				data() {
+						return {
+							sentLoginEmail: false,
+							email: '',
+							loggedIn: false,
+							search_results: [],
+							usersLoggedInEmail: '',
+							first_name: '',
+							middle_name: '',
+							last_name: '',
+							date_of_birth: '',
+							age: '',
+							persons_phone_numbers: [],
+							contacts: [],
+							medications: [],
+							editContact: -1,
+							isEditBasicInformation: false,
+							isEditSafetyInformation: false,
+							isEditPrecallCoping: false,
+							isEditMentalHealthTreatment: false,
+							isEditMedicationNotes: false,
+							appointments: [],
+							person_uuid: null,
+							bookmarked_people: [],
+							is_admin: false,
+							approved_professional_domains: [],
+							approved_professional_email_addresses: [],
+						}
+					},
+					created: function() {
+						updateUserInfo()
+					},
+					methods: {
+						getApprovedProfessionals: function() {
+							$.get('/get_approved_professionals', function(data) {
+								console.log(JSON.stringify(data))
+								app.approved_professional_domains = data.domains
+								app.approved_professional_email_addresses = data.email_addresses
+							})
+						},
+						getProfile: function(person_id) {
+							$.get('/get_profile', {
+								'person_id': person_id
+							}, function(data) {
+								app.person_uuid = data.id
+								app.first_name = data.first_name
+								app.middle_name = data.middle_name
+								app.last_name = data.last_name
+								app.preferred_name = data.preferred_name
+								app.preferred_gender_pronouns = data.preferred_gender_pronouns
+								app.date_of_birth = data.date_of_birth
+								app.age = data.age
+								app.persons_phone_numbers = data.persons_phone_numbers
+								app.contacts = data.contacts
+								app.current_physical_living_address_1 = data.current_physical_living_address_1
+								if(data.current_physical_living_address_2) {
+									app.current_physical_living_address_2 = data.current_physical_living_address_2
+								} else {
+									app.current_physical_living_address_2 = ''
+								}
+								app.current_physical_living_address_city = data.current_physical_living_address_city
+								app.current_physical_living_address_state = data.current_physical_living_address_state
+								app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
+								app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
+								app.medications = data.medications
+								app.safety_information = data.safety_information
+								app.mental_health_treatment_summary = data.mental_health_treatment_summary
+								app.medication_notes = data.medication_notes
+								app.appointments = data.appointments
+							});
+						},
+						bookmarkThisPerson: function(event) {
+							$.post('/bookmark_this_person', {
+								'person_uuid': app.person_uuid
+							})
+						},
+						sendLoginEmail: function(event) {
+							this.email = $('#login_email').val();
+							$.post("/send_login_email", {
+								email: $('#login_email').val()
+							}, function(data) {
+								app.sentLoginEmail = true;
+							});
+						},
+						login: function(event) {
+							$.post("/login", {
+								email_address: this.email,
+								code: $('#login_code').val()
+							}, function(data) {
+								updateUserInfo()
+							});
+						},
+						search: function(event) {
+							$.get("/search", {
+								first_name: $('#search-first-name').val(),
+								last_name: $('#search-last-name').val()
+							}, function(data) {
+								app.search_results = data
+							})
+						},
+						addPerson: function(event) {
+							$.post('/add_person', {
+								'first_name': $('#add-person-first-name').val(),
+								'middle_name': $('#add-person-middle-name').val(),
+								'last_name': $('#add-person-last-name').val(),
+								'birth_date': $('#add-person-birth-date').val(),
+							}, function(data) {
+								app.person_uuid = data.person_uuid
+							})
+						},
+						editBasicInformation: function(data) {
+							$.post('/edit_basic_information', {
+								"person_uuid": app.person_uuid,
+								"first_name": $('#edit-first-name').val(),
+								"middle_name": $('#edit-middle-name').val(),
+								"last_name": $('#edit-last-name').val(),
+								"preferred_name": $('#edit-preferred-name').val(),
+								"preferred_gender_pronouns": $("#edit-preferred-gender-pronouns option:selected").text(),
+								"current_physical_living_address_1": $('#edit-current-physical-living-address-1').val(),
+								"current_physical_living_address_2": $('#edit-current-physical-living-address-2').val(),
+								"current_physical_living_address_city": $('#edit-current-physical-living-address-city').val(),
+								"current_physical_living_address_state": $('#edit-current-physical-living-address-state').val(),
+								"current_physical_living_address_zip_code": $('#edit-current-physical-living-address-zip-code').val(),
+								"phone_number_0": $('#edit-phone-number-0').val(),
+								"phone_number_type_0": $('#edit-phone-number-type-0').val(),
+							}, function(data) {
+								app.isEditBasicInformation = false
+								app.first_name = data.first_name
+								app.middle_name = data.middle_name
+								app.last_name = data.last_name
+								app.preferred_name = data.preferred_name
+								app.preferred_gender_pronouns = data.preferred_gender_pronouns
+								app.current_physical_living_address_1 = data.current_physical_living_address_1
 								app.current_physical_living_address_2 = data.current_physical_living_address_2
-							} else {
-								app.current_physical_living_address_2 = ''
-							}
-							app.current_physical_living_address_city = data.current_physical_living_address_city
-							app.current_physical_living_address_state = data.current_physical_living_address_state
-							app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
-							app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
-							app.medications = data.medications
-							app.safety_information = data.safety_information
-							app.mental_health_treatment_summary = data.mental_health_treatment_summary
-							app.medication_notes = data.medication_notes
-							app.appointments = data.appointments
-						});
+								app.current_physical_living_address_city = data.current_physical_living_address_city
+								app.current_physical_living_address_state = data.current_physical_living_address_state
+								app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
+								app.persons_phone_numbers = data.persons_phone_numbers
+							})
+						},
+						editSafetyInformation: function(event) {
+							$.post('/edit_safety_information', {
+								"person_uuid": app.person_uuid,
+								'safety_information': $('#edit-safety-information').val()
+							}, function(data) {
+								app.isEditSafetyInformation = false
+								app.safety_information = data.safety_information
+							})
+						},
+						editPrecallCoping: function(event) {
+							$.post('/edit_precall_coping', {
+								"person_uuid": app.person_uuid,
+								'coping_techniques_to_use_before_calling_for_help': $('#edit-precall-coping').val()
+							}, function(data) {
+								app.isEditPrecallCoping = false
+								app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
+							})
+						},
+						editMentalHealthTreatment: function(event) {
+							$.post('/edit_mental_health_treatment', {
+								"person_uuid": app.person_uuid,
+								'mental_health_treatment_summary': $('#edit-mental-health-treatment-summary').val()
+							}, function(data) {
+								app.isEditMentalHealthTreatment = false
+								app.mental_health_treatment_summary = data.mental_health_treatment_summary
+							})
+						},
+						editMedicationNotes: function(event) {
+							$.post('/edit_medication_notes', {
+								"person_uuid": app.person_uuid,
+								'medication_notes': $('#edit-medication-notes').val()
+							}, function(data) {
+								app.isEditMedicationNotes = false
+								app.medication_notes = data.medication_notes
+							})
+						},
+						deleteMedication: function(index) {
+							$.post('/delete_medication', {
+								"index": index,
+								"person_uuid": app.person_uuid
+							}, function(data) {
+								app.medications = data
+							});
+						},
+						addMedication: function(event) {
+							$.post('/add_medication', {
+								"person_uuid": app.person_uuid,
+								"name": $('#add-medication-name').val(),
+								"tablet_size": $('#add-medication-tablet-size').val(),
+								"instructions": $('#add-medication-instructions').val()
+							}, function(data) {
+								app.medications = data
+								$('#add-medication-name').val('')
+								$('#add-medication-tablet-size').val('')
+								$('#add-medication-instructions').val('')
+							})
+						},
+						addAppointment: function(event) {
+							$.post('/add_appointment', {
+								"person_uuid": app.person_uuid,
+								"date": $('#add-appointment-date').val(),
+								"start_time": $('#add-appointment-start-time').val(),
+								"stop_time": $('#add-appointment-stop-time').val(),
+								"what": $('#add-appointment-what').val(),
+								"notes": $('#add-appointment-notes').val(),
+							}, function(data) {
+								app.appointments = data
+								$('#add-appointment-date').val(''),
+									$('#add-appointment-start-time').val('')
+								$('#add-appointment-stop-time').val('')
+								$('#add-appointment-what').val('')
+								$('#add-appointment-notes').val('')
+							})
+						},
+						deleteEvent: function(index) {
+							$.post('/delete_appointment', {
+								"index": index,
+								"person_uuid": app.person_uuid
+							}, function(data) {
+								app.appointments = data
+							});
+						},
+						deleteContact: function(index) {
+							$.post('/delete_contact', {
+								"index": index,
+								"person_uuid": app.person_uuid
+							}, function(data) {
+								app.contacts = data
+							});
+						},
+						addContact: function(event) {
+							$.post('/add_contact', {
+								"person_uuid": app.person_uuid,
+								"name": $('#add_contact_name').val(),
+								"relationship": $('#add_contact_relationship').val(),
+								"phone_number": $('#add_contact_phone_number').val(),
+								"email": $('#add_contact_email').val(),
+								"notes": $('#add_contact_notes').val()
+							}, function(data) {
+								app.contacts = data
+								$('#add_contact_name').val('')
+								$('#add_contact_relationship').val('')
+								$('#add_contact_phone_number').val('')
+								$('#add_contact_email').val('')
+								$('#add_contact_notes').val('')
+							})
+						},
+						editAContact: function(index) {
+							console.log($('#edit-contact-is-professional-' + index).val())
+							$.post('/edit_contact', {
+								"person_uuid": app.person_uuid,
+								"index": index,
+								"name": $('#edit-contact-name-' + index).val(),
+								"relationship": $('#edit-contact-relationship-' + index).val(),
+								"phone_number": $('#edit-contact-phone-number-' + index).val(),
+								"email": $('#edit-contact-email-' + index).val(),
+								"notes": $('#edit-contact-notes-' + index).val(),
+								"is_professional": $('#edit-contact-is-professional-' + index).is(':checked'),
+							}, function(data) {
+								app.editContact = -1;
+								app.contacts = data;
+							})
+						},
+						addProfessionalDomain: function() {
+							$.post('/add_professional_domain', {
+								'domain': $('#add-professional-domain').val()
+							}, function(data) {
+								$('#add-professional-domain').val('')
+								app.approved_professional_domains = data
+							})
+						},
+						addProfessionalEmailAddress: function() {
+							$.post('/add_professional_email_address', {
+								'email': $('#add-professional-email-address').val()
+							}, function(data) {
+								$('#add-professional-email-address').val('')
+								app.approved_professional_email_addresses = data
+							})
+						},
 					},
-					bookmarkThisPerson: function(event) {
-						$.post('/bookmark_this_person', {'person_uuid': app.person_uuid})
-					},
-					sendLoginEmail: function(event) {
-						this.email = $('#login_email').val();
-						$.post("/send_login_email", {
-							email: $('#login_email').val()
-						}, function(data) {
-							app.sentLoginEmail = true;
-						});
-					},
-					login: function(event) {
-						$.post("/login", {
-							email_address: this.email,
-							code: $('#login_code').val()
-						}, function(data) {
-							updateUserInfo()
-						});
-					},
-					search: function(event) {
-						$.get("/search", {
-							first_name: $('#search-first-name').val(),
-							last_name: $('#search-last-name').val()
-						}, function(data) {
-							app.search_results = data
-						})
-					},
-					addPerson: function(event) {
-						$.post('/add_person', {
-							'first_name': $('#add-person-first-name').val(),
-							'middle_name': $('#add-person-middle-name').val(),
-							'last_name': $('#add-person-last-name').val(),
-							'birth_date': $('#add-person-birth-date').val(),
-
-						}, function(data) {
-							app.person_uuid = data.person_uuid
-						})
-					},
-					editBasicInformation: function(data) {
-						$.post('/edit_basic_information', {
-							"person_uuid": app.person_uuid,
-							"first_name": $('#edit-first-name').val(),
-							"middle_name": $('#edit-middle-name').val(),
-							"last_name": $('#edit-last-name').val(),
-							"preferred_name": $('#edit-preferred-name').val(),
-							"preferred_gender_pronouns": $("#edit-preferred-gender-pronouns option:selected").text(),
-							"current_physical_living_address_1": $('#edit-current-physical-living-address-1').val(),
-							"current_physical_living_address_2": $('#edit-current-physical-living-address-2').val(),
-							"current_physical_living_address_city": $('#edit-current-physical-living-address-city').val(),
-							"current_physical_living_address_state": $('#edit-current-physical-living-address-state').val(),
-							"current_physical_living_address_zip_code": $('#edit-current-physical-living-address-zip-code').val(),
-							"phone_number_0": $('#edit-phone-number-0').val(),
-							"phone_number_type_0": $('#edit-phone-number-type-0').val(),
-						}, function(data) {
-							app.isEditBasicInformation = false
-							app.first_name = data.first_name
-							app.middle_name = data.middle_name
-							app.last_name = data.last_name
-							app.preferred_name = data.preferred_name
-							app.preferred_gender_pronouns = data.preferred_gender_pronouns
-							app.current_physical_living_address_1 = data.current_physical_living_address_1
-							app.current_physical_living_address_2 = data.current_physical_living_address_2
-							app.current_physical_living_address_city = data.current_physical_living_address_city
-							app.current_physical_living_address_state = data.current_physical_living_address_state
-							app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
-							app.persons_phone_numbers = data.persons_phone_numbers
-						})
-					},
-					editSafetyInformation: function(event) {
-						$.post('/edit_safety_information', {
-							"person_uuid": app.person_uuid,
-							'safety_information': $('#edit-safety-information').val()
-						}, function(data) {
-							app.isEditSafetyInformation = false
-							app.safety_information = data.safety_information
-						})
-					},
-					editPrecallCoping: function(event) {
-						$.post('/edit_precall_coping', {
-							"person_uuid": app.person_uuid,
-							'coping_techniques_to_use_before_calling_for_help': $('#edit-precall-coping').val()
-						}, function(data) {
-							app.isEditPrecallCoping = false
-							app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
-						})
-					},
-					editMentalHealthTreatment: function(event) {
-						$.post('/edit_mental_health_treatment', {
-							"person_uuid": app.person_uuid,
-							'mental_health_treatment_summary': $('#edit-mental-health-treatment-summary').val()
-						}, function(data) {
-							app.isEditMentalHealthTreatment = false
-							app.mental_health_treatment_summary = data.mental_health_treatment_summary
-						})
-					},
-					editMedicationNotes: function(event) {
-						$.post('/edit_medication_notes', {
-							"person_uuid": app.person_uuid,
-							'medication_notes': $('#edit-medication-notes').val()
-						}, function(data) {
-							app.isEditMedicationNotes = false
-							app.medication_notes = data.medication_notes
-						})
-					},
-					deleteMedication: function(index) {
-						$.post('/delete_medication', {
-							"index": index,
-							"person_uuid": app.person_uuid
-						}, function(data) {
-							app.medications = data
-						});
-					},
-					addMedication: function(event) {
-						$.post('/add_medication', {
-							"person_uuid": app.person_uuid,
-							"name": $('#add-medication-name').val(),
-							"tablet_size": $('#add-medication-tablet-size').val(),
-							"instructions": $('#add-medication-instructions').val()
-						}, function(data) {
-							app.medications = data
-							$('#add-medication-name').val('')
-							$('#add-medication-tablet-size').val('')
-							$('#add-medication-instructions').val('')
-						})
-					},
-					addAppointment: function(event) {
-						$.post('/add_appointment', {
-							"person_uuid": app.person_uuid,
-							"date": $('#add-appointment-date').val(),
-							"start_time": $('#add-appointment-start-time').val(),
-							"stop_time": $('#add-appointment-stop-time').val(),
-							"what": $('#add-appointment-what').val(),
-							"notes": $('#add-appointment-notes').val(),
-						}, function(data) {
-							app.appointments = data
-							$('#add-appointment-date').val(''),
-								$('#add-appointment-start-time').val('')
-							$('#add-appointment-stop-time').val('')
-							$('#add-appointment-what').val('')
-							$('#add-appointment-notes').val('')
-						})
-					},
-					deleteEvent: function(index) {
-						$.post('/delete_appointment', {
-							"index": index,
-							"person_uuid": app.person_uuid
-						}, function(data) {
-							app.appointments = data
-						});
-					},
-					deleteContact: function(index) {
-						$.post('/delete_contact', {
-							"index": index,
-							"person_uuid": app.person_uuid
-						}, function(data) {
-							app.contacts = data
-						});
-					},
-					addContact: function(event) {
-						$.post('/add_contact', {
-							"person_uuid": app.person_uuid,
-							"name": $('#add_contact_name').val(),
-							"relationship": $('#add_contact_relationship').val(),
-							"phone_number": $('#add_contact_phone_number').val(),
-							"email": $('#add_contact_email').val(),
-							"notes": $('#add_contact_notes').val()
-						}, function(data) {
-							app.contacts = data
-							$('#add_contact_name').val('')
-							$('#add_contact_relationship').val('')
-							$('#add_contact_phone_number').val('')
-							$('#add_contact_email').val('')
-							$('#add_contact_notes').val('')
-						})
-					},
-					editAContact: function(index) {
-						console.log($('#edit-contact-is-professional-' + index).val())
-						$.post('/edit_contact', {
-							"person_uuid": app.person_uuid,
-							"index": index,
-							"name": $('#edit-contact-name-' + index).val(),
-							"relationship": $('#edit-contact-relationship-' + index).val(),
-							"phone_number": $('#edit-contact-phone-number-' + index).val(),
-							"email": $('#edit-contact-email-' + index).val(),
-							"notes": $('#edit-contact-notes-' + index).val(),
-							"is_professional": $('#edit-contact-is-professional-' + index).is(':checked'),
-						}, function(data) {
-							app.editContact = -1;
-							app.contacts = data;
-						})
-					},
-          addProfessionalDomain: function() {
-            $.post('/add_professional_domain', {'domain': $('#add-professional-domain').val()}, function(data)
-          {
-            $('#add-professional-domain').val('')
-            app.approved_professional_domains = data
-          })
-          }
-
-				},
-				delimiters: ['[[', ']]']
-		}
-		app = Vue.createApp(App).mount('#app')
-	});
+					delimiters: ['[[', ']]']
+			}
+			app = Vue.createApp(App).mount('#app')
+		});
 	</script>
 </head>
 
 <body>
 	<div id="app">
 		<div id="header"> <span style="float:right" v-if="loggedIn"><a href="/logout">Logout</a> | [[ usersLoggedInEmail ]]</span>
-			<h1>Crisis Profile (early functioning prototype Do not put real data in the app if you worry about it getting leaked) by <a href="https://crisisresponse.services">Crisis Response Services</a><span> A care coordination app to effective help with mental illness</span></h1> </div>
+			<h1>Crisis Profile by <a href="https://crisisresponse.services">Crisis Response Services</a><span> 
+				A care coordination app for helping those with mental illness</span></h1> 
+			<p>This is an early prototype. Do not put real data in the app if you worry about it getting leaked.</p>
+		</div>
 		<div id="main">
 			<div v-if="!loggedIn">
 				<h3>Login</h3>
@@ -454,40 +470,50 @@
 					<br/> <strong>Zip code:</strong>
 					<input type="text" id="edit-current-physical-living-address-zip-code" v-bind:value="current_physical_living_address_zip_code">
 					<br/>
-					<br/> <strong>Phone number(s):</strong> <span v-for="(phone_number, index) in persons_phone_numbers">
+					<br/> <strong>Phone number(s):</strong>  <span v-for="(phone_number, index) in persons_phone_numbers">
                 <input type="text" v-bind:id="'edit-phone-number-'+index" v-bind:value="phone_number.phone_number"> 
                 (<strong>Phone type:</strong> <input tye="text" v-bind:id="'edit-phone-number-type-'+index" v-bind:value="phone_number.type">)
-        </span> </template>
+        </span> 
+				</template>
 				<template v-else>
 					<button @click="isEditBasicInformation = true">Edit basic information</button>
 					<br/> <strong>First name:</strong> [[ first_name ]] <strong>Middle name:</strong> [[ middle_name ]] <strong>Last name:</strong> [[ last_name ]] <strong>Date of birth:</strong> [[ date_of_birth ]] <strong>Age:</strong> [[ age ]]
 					<br/> <strong>Preferred name:</strong> [[ preferred_name ]] <strong>Preferred gender pronouns:</strong> [[ preferred_gender_pronouns ]]
-					<br/> <strong>Current physical living address:</strong> <a target="_blank" v-bind:href="'http://maps.google.com/maps?q='+current_physical_living_address_1+' '+current_physical_living_address_2+' '+current_physical_living_address_city+' '+current_physical_living_address_state+' '+current_physical_living_address_zip_code">
+					<br/> <strong>Current physical living address:</strong>  <a target="_blank" v-bind:href="'http://maps.google.com/maps?q='+current_physical_living_address_1+' '+current_physical_living_address_2+' '+current_physical_living_address_city+' '+current_physical_living_address_state+' '+current_physical_living_address_zip_code">
         [[ current_physical_living_address_1 ]],
         <span v-if="current_physical_living_address_2">[[ current_physical_living_address_2 ]], </span>[[ current_physical_living_address_city ]] 
         [[ current_physical_living_address_state ]],
         [[ current_physical_living_address_zip_code ]]</a>
-					<br/> <strong>Phone number(s):</strong> <span v-for="phone_number in persons_phone_numbers">
+					<br/> <strong>Phone number(s):</strong>  <span v-for="phone_number in persons_phone_numbers">
                 <a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
-        </span> </template>
+        </span> 
+				</template>
 				<h3>Table of contents</h3>
 				<ul id="toc">
-					<li><a href="#safety-information">Safety Information</a></li>
-					<li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)</a></li>
-					<li><a href="#mental-health-treatment-summary">Mental health treatment summary</a></li>
-					<li><a href="#medications">Medications</a></li>
-					<li><a href="#appointments">Appointments</a></li>
-					<li><a href="#contacts">Contacts</a></li>
+					<li><a href="#safety-information">Safety Information</a>
+					</li>
+					<li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)</a>
+					</li>
+					<li><a href="#mental-health-treatment-summary">Mental health treatment summary</a>
+					</li>
+					<li><a href="#medications">Medications</a>
+					</li>
+					<li><a href="#appointments">Appointments</a>
+					</li>
+					<li><a href="#contacts">Contacts</a>
+					</li>
 				</ul>
 				<h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
         <button @click="editSafetyInformation()">Save edits</button>
       </template>
-        <template v-else><button @click="isEditSafetyInformation = true">Edit</button></h3></template>
+        <template v-else><button @click="isEditSafetyInformation = true">Edit</button></h3>
+				</template>
 				</h3>
 				<template v-if="isEditSafetyInformation">
 					<textarea id="edit-safety-information" style="width:100%;height:200px;">[[ safety_information ]]</textarea>
 				</template>
-				<template v-else> <pre>[[ safety_information ]]</pre> </template>
+				<template v-else> <pre>[[ safety_information ]]</pre> 
+				</template>
 				<h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)
         <template v-if="isEditPrecallCoping">
           <button @click="editPrecallCoping">Save edit</button>
@@ -499,8 +525,7 @@
 				<template v-if="isEditPrecallCoping">
 					<textarea id="edit-precall-coping" style="width:100%;height:200px;">[[ coping_techniques_to_use_before_calling_for_help ]]</textarea>
 				</template>
-				<template v-else>
-					<pre>[[ coping_techniques_to_use_before_calling_for_help ]]</pre>
+				<template v-else> <pre>[[ coping_techniques_to_use_before_calling_for_help ]]</pre> 
 				</template>
 				<h3 id="mental_health_treatment_summary">Mental health treatment summary
         <template v-if="isEditMentalHealthTreatment">
@@ -514,11 +539,12 @@
 				<template v-if="isEditMentalHealthTreatment">
 					<textarea id="edit-mental-health-treatment-summary" style="width:100%;height:200px;">[[ mental_health_treatment_summary ]]</textarea>
 				</template>
-				<template v-else> <pre>[[ mental_health_treatment_summary ]]</pre></template>
+				<template v-else> <pre>[[ mental_health_treatment_summary ]]</pre>
+				</template>
 				<h3 id="medications">Medications</h3>
-				<h4>Current medications</h4> <strong>Add medication:</strong> Name:
-				<input type="text" id="add-medication-name"> Tablet size:
-				<input type="text" id="add-medication-tablet-size"> Instructions:
+				<h4>Current medications</h4>  <strong>Add medication:</strong> Name:
+				<input type="text" id="add-medication-name">Tablet size:
+				<input type="text" id="add-medication-tablet-size">Instructions:
 				<input type="text" id="add-medication-instructions">
 				<button @click="addMedication">Add medication</button>
 				<table>
@@ -550,8 +576,9 @@
 				<template v-if="isEditMedicationNotes">
 					<textarea id="edit-medication-notes" style="width:100%;height:30px;">[[ medication_notes ]]</textarea>
 				</template>
-				<template v-else> <pre>[[ medication_notes ]]</pre></template>
-				<h3 id="appointments">Appointments </h3> <strong>Add appointment:</strong> <strong>Date:</strong>
+				<template v-else> <pre>[[ medication_notes ]]</pre>
+				</template>
+				<h3 id="appointments">Appointments </h3>  <strong>Add appointment:</strong>  <strong>Date:</strong>
 				<input type="text" id="add-appointment-date"> <strong>Start time:</strong>
 				<input type="text" id="add-appointment-start-time"> <strong>Stop time:</strong>
 				<input type="text" id="add-appointment-stop-time"> <strong>What:</strong>
@@ -578,8 +605,8 @@
 							<button @click="deleteEvent(index)">X</button>
 						</td>
 					</tr>
-				</table> 
-				<h3 id="contacts">Contacts (<template v-if="contacts">[[ contacts.length ]]</template>)</h3> <strong>Name:</strong>
+				</table>
+				<h3 id="contacts">Contacts (<template v-if="contacts">[[ contacts.length ]]</template>)</h3>  <strong>Name:</strong>
 				<input type="text" id="add_contact_name" /> <strong>Relationship:</strong>
 				<input type="text" id="add_contact_relationship" /> <strong>Phone number:</strong>
 				<input type="text" id="add_contact_phone_number" /> <strong>Email:</strong>
@@ -599,25 +626,31 @@
 					<tr v-for="(contact, index) in contacts" v-bind:class="{professional: contact.is_professional}">
 						<td>
 							<template v-if="index == editContact">
-								<input type="text" v-bind:id="'edit-contact-name-'+index" v-bind:value="contact.name"> </template>
-							<template v-else> [[ contact.name ]] </template>
+								<input type="text" v-bind:id="'edit-contact-name-'+index" v-bind:value="contact.name">
+							</template>
+							<template v-else>[[ contact.name ]]</template>
 						</td>
 						<td>
 							<template v-if="index == editContact">
-								<input type="text" v-bind:id="'edit-contact-relationship-'+index" v-bind:value="contact.relationship"> </template>
-							<template v-else> [[ contact.relationship ]] </template>
+								<input type="text" v-bind:id="'edit-contact-relationship-'+index" v-bind:value="contact.relationship">
+							</template>
+							<template v-else>[[ contact.relationship ]]</template>
 						</td>
 						<td>
 							<template v-if="index == editContact">
-								<input type="text" v-bind:id="'edit-contact-phone-number-'+index" v-bind:value="contact.phone_number"> </template>
-							<template v-else> <a v-bind:href="'tel:+1'+contact.phone_number">[[ contact.phone_number ]]</a></td>
+								<input type="text" v-bind:id="'edit-contact-phone-number-'+index" v-bind:value="contact.phone_number">
+							</template>
+							<template v-else> <a v-bind:href="'tel:+1'+contact.phone_number">[[ contact.phone_number ]]</a>
+						</td>
 						</template>
 						</td>
 						<td>
 							<template v-if="index == editContact">
-								<input type="text" v-bind:id="'edit-contact-email-'+index" v-bind:value="contact.email"> </template>
+								<input type="text" v-bind:id="'edit-contact-email-'+index" v-bind:value="contact.email">
+							</template>
 							<template v-else> <a v-bind:href="'mailto:'+contact.email">
-          [[ contact.email ]]</a></template>
+          [[ contact.email ]]</a>
+							</template>
 						</td>
 						<td>
 							<template v-if="index == editContact">
@@ -629,9 +662,7 @@
 							<template v-if="index == editContact">
 								<input type="checkbox" v-bind:checked="contact.is_professional" v-bind:id="'edit-contact-is-professional-'+index">
 							</template>
-							<template v-if="contact.is_professional">
-								Professional
-							</template>
+							<template v-if="contact.is_professional">Professional</template>
 						</td>
 						<td>
 							<template v-if="index == editContact">
@@ -645,17 +676,16 @@
 					</tr>
 				</table>
 			</div>
-			<div v-else-if="is_professional"> 
-				<h3>Add person</h3>
-				<strong>First name:</strong> <input type="text" id="add-person-first-name"> 
-				<strong>Middle name:</strong> <input type="text" id="add-person-middle-name"> 
-				<strong>Last name:</strong> <input type="text" id="add-person-last-name"> 
-				<strong>Birthdate (MM/DD/YYYY):</strong> <input type="text" id="add-person-birth-date"> 
-				
+			<div v-else-if="is_professional">
+				<h3>Add person</h3>  <strong>First name:</strong>
+				<input type="text" id="add-person-first-name"> <strong>Middle name:</strong>
+				<input type="text" id="add-person-middle-name"> <strong>Last name:</strong>
+				<input type="text" id="add-person-last-name"> <strong>Birthdate (MM/DD/YYYY):</strong>
+				<input type="text" id="add-person-birth-date">
 				<button @click="addPerson()">Add person</button>
 				<h3>Search</h3> &nbsp; <strong>First name:</strong>&nbsp;
-				<input type="text" id="search-first-name"> &nbsp;<strong>Last name:</strong>&nbsp;
-				<input type="text" id="search-last-name" v-on:keyup.enter="search"> &nbsp;
+				<input type="text" id="search-first-name">&nbsp;<strong>Last name:</strong>&nbsp;
+				<input type="text" id="search-last-name" v-on:keyup.enter="search">&nbsp;
 				<button @click="search">Search</button>
 				<table v-if="search_results.length > 0">
 					<tr>
@@ -665,34 +695,43 @@
 						<th>Last name</th>
 					</tr>
 					<tr v-for="person in search_results">
-						<td><a href="#" @click="getProfile(person.id)">Open</a></td>
+						<td><a href="#" @click="getProfile(person.id)">Open</a>
+						</td>
 						<td>[[ person.first_name ]]</td>
 						<td>[[ person.middle_name ]]</td>
 						<td>[[ person.last_name ]]</td>
 					</tr>
-		</table>
-		<h3>Bookmarked people</h3>
-		<table v-if="bookmarked_people.length > 0">
-			<tr>
-				<th></th>
-				<th>First name</th>
-				<th>Middle name</th>
-				<th>Last name</th>
-			</tr>
-			<tr v-for="person in bookmarked_people">
-				<td><a href="#" @click="getProfile(person.id)">Open</a></td>
-				<td>[[ person.first_name ]]</td>
-				<td>[[ person.middle_name ]]</td>
-				<td>[[ person.last_name ]]</td>
-			</tr>
-</table>
-        <template v-if="is_admin">
-          <h3>Approved domains</h3>
-          <strong>Add domain</strong> <input type="text" id="add-professional-domain" v-on:keyup.enter="addProfessionalDomain"> <button @click="addProfessionalDomain">Add domain</button>
-          <ul>
-            <li v-for="domain in approved_professional_domains">[[ domain ]]</li>
-          </ul>
-        </template>
+				</table>
+				<h3>Bookmarked people</h3>
+				<table v-if="bookmarked_people.length > 0">
+					<tr>
+						<th></th>
+						<th>First name</th>
+						<th>Middle name</th>
+						<th>Last name</th>
+					</tr>
+					<tr v-for="person in bookmarked_people">
+						<td><a href="#" @click="getProfile(person.id)">Open</a>
+						</td>
+						<td>[[ person.first_name ]]</td>
+						<td>[[ person.middle_name ]]</td>
+						<td>[[ person.last_name ]]</td>
+					</tr>
+				</table>
+				<template v-if="is_admin">
+					<h3>Approved professional domains</h3>  <strong>Add domain</strong>
+					<input type="text" id="add-professional-domain" v-on:keyup.enter="addProfessionalDomain">
+					<button @click="addProfessionalDomain">Add domain</button>
+					<ul>
+						<li v-for="domain in approved_professional_domains">[[ domain ]]</li>
+					</ul>
+					<h3>Approved professional email addresses</h3>  <strong>Add email address</strong>
+					<input type="text" id="add-professional-email-address" v-on:keyup.enter="addProfessionalEmailAddress">
+					<button @click="addProfessionalEmailAddress">Add domain</button>
+					<ul>
+						<li v-for="email_address in approved_professional_email_addresses">[[ email_address ]]</li>
+					</ul>
+				</template>
 			</div>
 		</div>
 	</div>
