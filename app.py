@@ -215,6 +215,7 @@ class Person(db.Model):
         data['mental_health_treatment_summary'] = self.mental_health_treatment_summary 
         data['medication_notes'] = self.medication_notes
         data['appointments'] = self.appointments
+        data['audit_trail'] = self.audit_trail
         return data
 
 
@@ -269,8 +270,16 @@ def load_user(userid):
 @app.route('/get_profile', methods=['GET'])
 @login_required
 def get_profile():
-    person_query = Person.query.filter_by(id=request.args['person_id']).first()
-    return jsonify(person_query.to_json())
+    person = Person.query.filter_by(id=request.args['person_id']).first()
+    from datetime import datetime
+    now = datetime.now()
+    now = now.strftime("%d/%m/%Y %H:%M:%S")
+    if not person.audit_trail:
+        person.audit_trail = []
+    person.audit_trail.append({'email': current_user.email_address, 'what': 'accessed profile', 'datetime': now})
+    flag_modified(person, "audit_trail")
+    db.session.commit()
+    return jsonify(person.to_json())
 
 @app.route('/get_approved_professionals', methods=['GET'])
 @login_required

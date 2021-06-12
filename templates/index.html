@@ -159,6 +159,7 @@
 							is_admin: false,
 							approved_professional_domains: [],
 							approved_professional_email_addresses: [],
+							audit_trail: [],
 						}
 					},
 					created: function() {
@@ -201,6 +202,7 @@
 								app.mental_health_treatment_summary = data.mental_health_treatment_summary
 								app.medication_notes = data.medication_notes
 								app.appointments = data.appointments
+								app.audit_trail = data.audit_trail
 							});
 						},
 						bookmarkThisPerson: function(event) {
@@ -673,6 +675,19 @@
 							</template>
 							<button @click="deleteContact(index)">X</button>
 						</td>
+					</tr>
+				</table>
+				<h3 id="audit_trail">Audit trail</h3>
+				<table>
+					<tr>
+						<th>Datetime</th>
+						<th>Email address</th>
+						<th>What</th>
+					</tr>
+					<tr v-for="event in audit_trail.slice().reverse()">
+						<td>[[ event.datetime ]]</td>
+						<td>[[ event.email ]]</td>
+						<td>[[ event.what ]]</td>
 					</tr>
 				</table>
 			</div>
