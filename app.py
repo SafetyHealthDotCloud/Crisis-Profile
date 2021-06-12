@@ -46,6 +46,11 @@ def create_random_string():
 def make_session_permanent():
     session.permanent = True
 
+
+# init Alchemy Dumps
+from flask_alchemydumps import AlchemyDumps
+alchemydumps = AlchemyDumps(app, db)
+
 # When someone puts in their email address
 # we compare it to list of approved work email
 # addresses and domains
