@@ -429,7 +429,7 @@
 		<div id="main">
 			<div v-if="!loggedIn">
 				<h3>Login</h3>
-				<div v-if="sentLoginEmail"> <strong>Your login code:</strong>
+				<div v-if="sentLoginEmail"> <strong>Go to your email and copy and paste your login code here:</strong>
 					<input type="text" id="login_code" v-on:keyup.enter="login" />
 					<button @click="login">Login</button>
 				</div>
