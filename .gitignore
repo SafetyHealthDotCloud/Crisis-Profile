@@ -20,7 +20,7 @@ parts/
 sdist/
 var/
 wheels/
-alchemydumps/
+alchemydumps-backups/
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
