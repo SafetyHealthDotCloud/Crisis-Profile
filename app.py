@@ -254,7 +254,7 @@ def send_login_email():
             % (os.getenv("API_EMAIL_DOMAIN_NAME")),
             "to": ["%s" % (request.form.get('email'))],
             "subject": "Login code for Crisis Profile",
-            "text": 'Hi! This is a login email for logging into Crisis Profile. Enter the code: %s on crisisprofile.com'
+            "text": 'Hi! This is a login email for logging into Crisis Profile. Enter the code: %s on https://crisisprofile.com'
             % (
                 verification_token,
             ),
