@@ -114,6 +114,7 @@
 		$(function() {
 			function updateUserInfo() {
 				$.post('/user_info', function(data) {
+					console.log(JSON.stringify(data))
 					if(data.result == 200) {
 						app.is_professional = data.data.is_professional
 						app.is_admin = data.data.is_admin
@@ -131,6 +132,7 @@
 					}
 				})
 			}
+			setInterval(updateUserInfo, 10000);
 			const App = {
 				data() {
 						return {
