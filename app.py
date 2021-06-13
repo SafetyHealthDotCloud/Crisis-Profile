@@ -274,7 +274,7 @@ def get_profile():
     person = Person.query.filter_by(id=request.args['person_id']).first()
     from datetime import datetime
     now = datetime.now()
-    now = now.strftime("%d/%m/%Y %H:%M:%S")
+    now = now.strftime("%m/%d/%Y %H:%M:%S")
     if not person.audit_trail:
         person.audit_trail = []
     person.audit_trail.append({'email': current_user.email_address, 'what': 'accessed profile', 'datetime': now})
