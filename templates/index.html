@@ -149,6 +149,7 @@
 							medications: [],
 							editContact: -1,
 							isEditBasicInformation: false,
+							isEditBio: false,
 							isEditSafetyInformation: false,
 							isEditPrecallCoping: false,
 							isEditMentalHealthTreatment: false,
@@ -160,6 +161,7 @@
 							approved_professional_domains: [],
 							approved_professional_email_addresses: [],
 							audit_trail: [],
+							bio: '',
 						}
 					},
 					created: function() {
@@ -203,6 +205,7 @@
 								app.medication_notes = data.medication_notes
 								app.appointments = data.appointments
 								app.audit_trail = data.audit_trail
+								app.bio = bio
 							});
 						},
 						bookmarkThisPerson: function(event) {
@@ -272,6 +275,15 @@
 								app.current_physical_living_address_state = data.current_physical_living_address_state
 								app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
 								app.persons_phone_numbers = data.persons_phone_numbers
+							})
+						},
+						editBio: function(event) {
+							$.post('/edit_bio', {
+								"person_uuid": app.person_uuid,
+								'bio': $('#edit-bio').val()
+							}, function(data) {
+								app.isEditBio = false
+								app.bio = data.bio
 							})
 						},
 						editSafetyInformation: function(event) {
@@ -492,6 +504,7 @@
 				</template>
 				<h3>Table of contents</h3>
 				<ul id="toc">
+					<li><a href="#bio">Bio</a></li>
 					<li><a href="#safety-information">Safety Information</a>
 					</li>
 					<li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)</a>
@@ -506,6 +519,17 @@
 					</li>
 					<li><a href="#audit_trail">Audit trail</a></li>
 				</ul>
+				<h3 id="bio">Bio <template v-if="isEditBio">
+					<button @click="editBio()">Save edits</button>
+				  </template>
+					<template v-else><button @click="isEditBio = true">Edit</button></h3>
+							</template>
+							</h3>
+							<template v-if="isEditBio">
+								<textarea id="edit-bio" style="width:100%;height:200px;">[[ bio ]]</textarea>
+							</template>
+							<template v-else> <pre>[[ bio ]]</pre> 
+							</template>
 				<h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
         <button @click="editSafetyInformation()">Save edits</button>
       </template>

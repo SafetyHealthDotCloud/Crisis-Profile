@@ -216,6 +216,7 @@ class Person(db.Model):
         data['medication_notes'] = self.medication_notes
         data['appointments'] = self.appointments
         data['audit_trail'] = self.audit_trail
+        data['bio'] = self.bio
         return data
 
 
@@ -330,6 +331,15 @@ def edit_basic_information():
     flag_modified(person, "persons_phone_numbers")
     db.session.commit()
     return jsonify(above_elements)
+
+@app.route('/edit_bio', methods=['POST'])
+@login_required
+def edit_bio():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.bio = request.form['bio']
+    db.session.commit()
+    return jsonify({'bio': person.bio})
 
 @app.route('/edit_safety_information', methods=['POST'])
 @login_required
