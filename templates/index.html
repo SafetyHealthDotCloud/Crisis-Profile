@@ -114,7 +114,6 @@
 		$(function() {
 			function updateUserInfo() {
 				$.post('/user_info', function(data) {
-					console.log(JSON.stringify(data))
 					if(data.result == 200) {
 						app.is_professional = data.data.is_professional
 						app.is_admin = data.data.is_admin
@@ -175,7 +174,6 @@
 					methods: {
 						getApprovedProfessionals: function() {
 							$.get('/get_approved_professionals', function(data) {
-								console.log(JSON.stringify(data))
 								app.approved_professional_domains = data.domains
 								app.approved_professional_email_addresses = data.email_addresses
 							})
@@ -416,7 +414,6 @@
 							})
 						},
 						editAContact: function(index) {
-							console.log($('#edit-contact-is-professional-' + index).val())
 							$.post('/edit_contact', {
 								"person_uuid": app.person_uuid,
 								"index": index,
@@ -459,7 +456,7 @@
 	<div id="app">
 		<div id="header"> <span style="float:right" v-if="loggedIn"><a href="/logout">Logout</a> | [[ usersLoggedInEmail ]]</span>
 			<h1>Crisis Profile by <a href="https://crisisresponse.services">Crisis Response Services</a><span> 
-				A care coordination app for helping those with mental illness</span></h1> 
+				Care coordination for people in crisis</span></h1> 
 			<p>This is an early prototype. Do not put real data in the app if you worry about it getting leaked.</p>
 		</div>
 		<div id="main">
