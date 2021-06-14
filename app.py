@@ -514,7 +514,23 @@ def edit_contact():
     person.contacts = contacts
     flag_modified(person, "contacts")
     db.session.commit()
-    return jsonify(contacts)    
+    return jsonify(contacts)  
+
+@app.route('/move_contact_upwards', methods=['POST'])
+@login_required
+def move_contact_upwards():
+    index = int(request.form['index'])
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    contacts = person.contacts
+    above_contact = contacts[index - 1]
+    contact_to_move = contacts[index]
+    contacts[index - 1] = contact_to_move
+    contacts[index] = above_contact
+    person.contacts = contacts
+    flag_modified(person, "contacts")
+    db.session.commit()
+    return jsonify(contacts)       
 
 @app.route('/login', methods=['POST'])
 def login():

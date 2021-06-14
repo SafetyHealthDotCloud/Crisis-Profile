@@ -428,6 +428,14 @@
 								app.contacts = data;
 							})
 						},
+						moveContactUpwards: function(index) {
+							$.post('/move_contact_upwards', {
+								"person_uuid": app.person_uuid,
+								"index": index,
+							}, function(data) {
+								app.contacts = data
+							})
+						},
 						addProfessionalDomain: function() {
 							$.post('/add_professional_domain', {
 								'domain': $('#add-professional-domain').val()
@@ -466,7 +474,11 @@
 					<input type="text" id="login_code" v-on:keyup.enter="login" />
 					<button @click="login">Login</button>
 				</div>
-				<div v-else> <strong>Your email (if you're a professional needing access for work then use your work email address):</strong>
+				<div v-else> 
+					<p>Email <a href="mailto:tim.clemans@crisisresponse.services">tim.clemans@crisisresponse.services</a> 
+						to have your work email domain or email address added as a professional.</p>
+						<p>To gain access put in your work email address, then go to your email, copy & paste the code into the page, then click login.</p>
+					<strong>Your email (if you're a professional needing access for work then use your work email address):</strong>
 					<br/>
 					<input type="text" name="email" id="login_email" style="width:300px" v-on:keyup.enter="sendLoginEmail" />
 					<button @click="sendLoginEmail">Login</button>
@@ -732,6 +744,7 @@
 							<template v-else>
 								<button @click="editContact = index">Edit</button>
 							</template>
+							<template v-if="index != 0"><button @click="moveContactUpwards(index)">&#x2191;</button></template>
 							<button @click="deleteContact(index)">X</button>
 						</td>
 					</tr>
