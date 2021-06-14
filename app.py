@@ -200,8 +200,8 @@ class Person(db.Model):
         data['last_name'] = self.last_name
         data['preferred_name'] = self.preferred_name
         data['preferred_gender_pronouns'] = self.preferred_gender_pronouns
-        data['date_of_birth'] = self.date_of_birth.strftime("%B %-d, %Y")
-        data['age'] = calculate_age(self.date_of_birth.date())
+        data['date_of_birth'] = self.date_of_birth.strftime("%B %-d, %Y") if self.date_of_birth else ''
+        data['age'] = calculate_age(self.date_of_birth.date())  if self.date_of_birth else ''
         data['contacts'] = self.contacts
         data['persons_phone_numbers'] = self.persons_phone_numbers
         data['current_physical_living_address_1'] = self.current_physical_living_address_1
@@ -274,8 +274,12 @@ def load_user(userid):
 def get_profile():
     person = Person.query.filter_by(id=request.args['person_id']).first()
     from datetime import datetime
-    now = datetime.now()
-    now = now.strftime("%m/%d/%Y %H:%M:%S")
+    import pytz
+    
+    now_utc = datetime.utcnow().replace(tzinfo=pytz.utc)
+
+    la_timezone = pytz.timezone('America/Los_Angeles')
+    now = la_timezone.normalize(now_utc.astimezone(la_timezone)).strftime("%m/%d/%Y %H:%M:%S")
     if not person.audit_trail:
         person.audit_trail = []
     person.audit_trail.append({'email': current_user.email_address, 'what': 'accessed profile', 'datetime': now})

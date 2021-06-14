@@ -7,3 +7,4 @@ GeoAlchemy2
 Flask-Script
 flask-login
 flask-alchemydumps
+pytz
