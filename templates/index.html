@@ -165,6 +165,7 @@
 							approved_professional_email_addresses: [],
 							audit_trail: [],
 							bio: '',
+							deescalation_plan: '',
 						}
 					},
 					created: function() {
@@ -209,6 +210,7 @@
 								app.appointments = data.appointments
 								app.audit_trail = data.audit_trail
 								app.bio = data.bio
+								app.deescalation_plan = data.deescalation_plan
 							});
 						},
 						bookmarkThisPerson: function(event) {

@@ -217,6 +217,7 @@ class Person(db.Model):
         data['appointments'] = self.appointments
         data['audit_trail'] = self.audit_trail
         data['bio'] = self.bio
+        data['deescalation_plan'] = self.deescalation_instructions
         return data
 
 
