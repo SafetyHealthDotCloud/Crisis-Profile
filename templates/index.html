@@ -121,7 +121,7 @@
 						app.usersLoggedInEmail = data.data.email_address
 						app.loggedIn = true
 						app.bookmarked_people = data.data.bookmarked_people
-						if(data.data.person_id) {
+						if(data.data.person_id && !app.person_uuid) {
 							app.getProfile(data.data.person_id)
 						}
 						if(app.is_admin) {
