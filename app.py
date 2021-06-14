@@ -305,6 +305,20 @@ def bookmark_this_person():
     db.session.commit()
     return jsonify({'successful': True})
 
+@app.route('/unbookmark_this_person', methods=['POST'])
+@login_required
+def unbookmark_this_person():
+    user = current_user
+    if not user.bookmarked_people:
+        user.bookmarked_people = []
+    print(user.bookmarked_people)
+    print(request.form['person_uuid'])
+    user.bookmarked_people.remove(request.form['person_uuid'])
+    flag_modified(user, "bookmarked_people")
+    db.session.commit()
+    return jsonify(user.bookmarked_people)
+
+
 @app.route('/edit_basic_information', methods=['POST'])
 @login_required
 def edit_basic_information():

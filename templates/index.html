@@ -128,7 +128,8 @@
 							app.getApprovedProfessionals()
 						}
 					} else {
-						app.loggedIn = false;
+						app.sentLoginEmail = false;
+						//app.loggedIn = false;
 					}
 				})
 			}
@@ -216,6 +217,13 @@
 						bookmarkThisPerson: function(event) {
 							$.post('/bookmark_this_person', {
 								'person_uuid': app.person_uuid
+							})
+						},
+						unbookmarkThisPerson: function(id) {
+							$.post('/unbookmark_this_person', {
+								'person_uuid': id
+							}, function(data) {
+								app.bookmarked_people = data;
 							})
 						},
 						sendLoginEmail: function(event) {
@@ -746,13 +754,8 @@
 				</table>
 			</div>
 			<div v-else-if="is_professional">
-				<h3>Make a new profile for a person who are working with:</h3>  <strong>First name:</strong>
-				<input type="text" id="add-person-first-name"> <strong>Middle name:</strong>
-				<input type="text" id="add-person-middle-name"> <strong>Last name:</strong>
-				<input type="text" id="add-person-last-name"> <strong>Birthdate (MM/DD/YYYY):</strong>
-				<input type="text" id="add-person-birth-date">
-				<button @click="addPerson()">Add person</button>
-				<h3>Search</h3> &nbsp; <strong>First name:</strong>&nbsp;
+				
+				<h3 style="border-bottom:1px solid #000">Search</h3> &nbsp; <strong>First name:</strong>&nbsp;
 				<input type="text" id="search-first-name">&nbsp;<strong>Last name:</strong>&nbsp;
 				<input type="text" id="search-last-name" v-on:keyup.enter="search">&nbsp;
 				<button @click="search">Search</button>
@@ -771,13 +774,20 @@
 						<td>[[ person.last_name ]]</td>
 					</tr>
 				</table>
-				<h3>Bookmarked people</h3>
+				<h3 style="border-bottom:1px solid #000">Make a new profile for a person who are working with:</h3>  <strong>First name:</strong>
+				<input type="text" id="add-person-first-name"> <strong>Middle name:</strong>
+				<input type="text" id="add-person-middle-name"> <strong>Last name:</strong>
+				<input type="text" id="add-person-last-name"> <strong>Birthdate (MM/DD/YYYY):</strong>
+				<input type="text" id="add-person-birth-date">
+				<button @click="addPerson()">Add person</button>
+				<h3 style="border-bottom:1px solid #000">Bookmarked people</h3>
 				<table v-if="bookmarked_people.length > 0">
 					<tr>
 						<th></th>
 						<th>First name</th>
 						<th>Middle name</th>
 						<th>Last name</th>
+						<th>Unbookmark</th>
 					</tr>
 					<tr v-for="person in bookmarked_people">
 						<td><a href="#" @click="getProfile(person.id)">Open</a>
@@ -785,6 +795,7 @@
 						<td>[[ person.first_name ]]</td>
 						<td>[[ person.middle_name ]]</td>
 						<td>[[ person.last_name ]]</td>
+						<td><button @click="unbookmarkThisPerson(person.id)">X</button></td>
 					</tr>
 				</table>
 				<template v-if="is_admin">
