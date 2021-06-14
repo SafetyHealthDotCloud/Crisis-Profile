@@ -156,6 +156,7 @@
 							isEditPrecallCoping: false,
 							isEditMentalHealthTreatment: false,
 							isEditMedicationNotes: false,
+							isEditDeescalationPlan: false,
 							appointments: [],
 							person_uuid: null,
 							bookmarked_people: [],
@@ -295,6 +296,15 @@
 							}, function(data) {
 								app.isEditSafetyInformation = false
 								app.safety_information = data.safety_information
+							})
+						},
+						editDeescalationPlan: function(event) {
+							$.post('/edit_deescalation_plan', {
+								"person_uuid": app.person_uuid,
+								'deescalation_plan': $('#edit-de-escalation-plan').val()
+							}, function(data) {
+								app.isEditDeescalationPlan = false
+								app.deescalation_plan = data.deescalation_plan
 							})
 						},
 						editPrecallCoping: function(event) {
@@ -506,9 +516,12 @@
 				</template>
 				<h3>Table of contents</h3>
 				<ul id="toc">
-					<li><a href="#bio">Bio</a></li>
+					
 					<li><a href="#safety-information">Safety Information</a>
 					</li>
+
+					<li><a href="#de-escalation-plan">De-escalation plan</a></li>
+					<li><a href="#bio">Bio</a></li>
 					<li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)</a>
 					</li>
 					<li><a href="#mental-health-treatment-summary">Mental health treatment summary</a>
@@ -521,17 +534,7 @@
 					</li>
 					<li><a href="#audit_trail">Audit trail</a></li>
 				</ul>
-				<h3 id="bio">Bio <template v-if="isEditBio">
-					<button @click="editBio()">Save edits</button>
-				  </template>
-					<template v-else><button @click="isEditBio = true">Edit</button></h3>
-							</template>
-							</h3>
-							<template v-if="isEditBio">
-								<textarea id="edit-bio" style="width:100%;height:200px;">[[ bio ]]</textarea>
-							</template>
-							<template v-else> <pre>[[ bio ]]</pre> 
-							</template>
+				
 				<h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
         <button @click="editSafetyInformation()">Save edits</button>
       </template>
@@ -543,6 +546,29 @@
 				</template>
 				<template v-else> <pre>[[ safety_information ]]</pre> 
 				</template>
+				<h3 id="de-escalation-plan">De-escalation plan <template v-if="isEditDeescalationPlan">
+					<button @click="editDeescalationPlan()">Save edits</button>
+				  </template>
+					<template v-else><button @click="isEditDeescalationPlan = true">Edit</button></h3>
+							</template>
+							</h3>
+							<template v-if="isEditDeescalationPlan">
+								<textarea id="edit-de-escalation-plan" style="width:100%;height:200px;">
+									[[ deescalation_plan ]]</textarea>
+							</template>
+							<template v-else> <pre>[[ deescalation_plan ]]</pre> 
+							</template>
+				<h3 id="bio">Bio <template v-if="isEditBio">
+					<button @click="editBio()">Save edits</button>
+				  </template>
+					<template v-else><button @click="isEditBio = true">Edit</button></h3>
+							</template>
+							</h3>
+							<template v-if="isEditBio">
+								<textarea id="edit-bio" style="width:100%;height:200px;">[[ bio ]]</textarea>
+							</template>
+							<template v-else> <pre>[[ bio ]]</pre> 
+							</template>
 				<h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)
         <template v-if="isEditPrecallCoping">
           <button @click="editPrecallCoping">Save edit</button>

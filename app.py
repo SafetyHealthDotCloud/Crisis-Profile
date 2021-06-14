@@ -349,6 +349,16 @@ def edit_safety_information():
     person.safety_information = request.form['safety_information']
     db.session.commit()
     return jsonify({'safety_information': person.safety_information})
+
+@app.route('/edit_deescalation_plan', methods=['POST'])
+@login_required
+def edit_deescalation_plan():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.deescalation_instructions = request.form['deescalation_plan']
+    db.session.commit()
+    return jsonify({'deescalation_plan': person.deescalation_instructions})
+
 from sqlalchemy import and_, or_, not_
 
 @app.route('/search', methods=['GET'])
