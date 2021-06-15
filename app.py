@@ -160,6 +160,7 @@ class Person(db.Model):
     tattoos = db.Column(JSON(), nullable=True)
     scars = db.Column(db.String(), nullable=True)
     marks = db.Column(db.String(), nullable=True)
+    most_important_contacts = db.Column(JSON(), default=[])
     contacts = db.Column(JSON(), nullable=True) # keys: name, relationship_to_person, phone_numbers (keys: phone_number, type), address
     audit_trail = db.Column(JSON(), nullable=True) # log all access to the person's data (keys: email_address, ip, datetime, did_what, reason_for_access, agency, CAD_number, RMS_number)
     incidents = db.Column(JSON(), nullable=True)
@@ -202,6 +203,7 @@ class Person(db.Model):
         data['preferred_gender_pronouns'] = self.preferred_gender_pronouns
         data['date_of_birth'] = self.date_of_birth.strftime("%B %-d, %Y") if self.date_of_birth else ''
         data['age'] = calculate_age(self.date_of_birth.date())  if self.date_of_birth else ''
+        data['most_important_contacts'] = self.most_important_contacts
         data['contacts'] = self.contacts
         data['persons_phone_numbers'] = self.persons_phone_numbers
         data['current_physical_living_address_1'] = self.current_physical_living_address_1
@@ -218,6 +220,7 @@ class Person(db.Model):
         data['audit_trail'] = self.audit_trail
         data['bio'] = self.bio
         data['deescalation_plan'] = self.deescalation_instructions
+
         return data
 
 
@@ -465,6 +468,62 @@ def delete_appointment():
     return jsonify(appointments)
 
 
+@app.route('/delete_most_important_contact', methods=['POST'])
+@login_required
+def delete_most_important_contact():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    contacts = person.most_important_contacts
+    del contacts[int(request.form['index'])]
+    person.most_important_contacts = contacts
+    flag_modified(person, "most_important_contacts")
+    db.session.commit()
+    return jsonify(contacts)    
+
+@app.route('/add_most_important_contact', methods=['POST'])
+@login_required
+def add_most_important_contact():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    contacts = person.most_important_contacts
+    if not contacts:
+        contacts = []
+    contacts.append({'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes']})
+    person.most_important_contacts = contacts
+    flag_modified(person, "most_important_contacts")
+    db.session.commit()
+    return jsonify(contacts)
+
+@app.route('/edit_most_important_contact', methods=['POST'])
+@login_required
+def edit_most_important_contact():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    contacts = person.most_important_contacts
+    contacts[int(request.form['index'])] = {'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes'], 'is_professional': True if request.form['is_professional'] == 'true' else False}
+    person.most_important_contacts = contacts
+    flag_modified(person, "most_important_contacts")
+    db.session.commit()
+    return jsonify(contacts)  
+
+
+
+@app.route('/move_most_important_contact_upwards', methods=['POST'])
+@login_required
+def move_most_important_contact_upwards():
+    index = int(request.form['index'])
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    contacts = person.most_important_contacts
+    above_contact = contacts[index - 1]
+    contact_to_move = contacts[index]
+    contacts[index - 1] = contact_to_move
+    contacts[index] = above_contact
+    person.most_important_contacts = contacts
+    flag_modified(person, "most_important_contacts")
+    db.session.commit()
+    return jsonify(contacts)  
+
 @app.route('/add_appointment', methods=['POST'])
 @login_required
 def add_appointment():
@@ -498,6 +557,8 @@ def add_contact():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
     contacts = person.contacts
+    if not contacts:
+        contacts = []
     contacts.append({'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes']})
     person.contacts = contacts
     flag_modified(person, "contacts")

@@ -147,9 +147,11 @@
 							date_of_birth: '',
 							age: '',
 							persons_phone_numbers: [],
+							most_important_contacts: [],
 							contacts: [],
 							medications: [],
 							editContact: -1,
+							editMostImportantContact: -1,
 							isEditBasicInformation: false,
 							isEditBio: false,
 							isEditSafetyInformation: false,
@@ -191,6 +193,7 @@
 								app.date_of_birth = data.date_of_birth
 								app.age = data.age
 								app.persons_phone_numbers = data.persons_phone_numbers
+								app.most_important_contacts = data.most_important_contacts
 								app.contacts = data.contacts
 								app.current_physical_living_address_1 = data.current_physical_living_address_1
 								if(data.current_physical_living_address_2) {
@@ -387,6 +390,54 @@
 							}, function(data) {
 								app.appointments = data
 							});
+						},
+						deleteMostImportantContact: function(index) {
+							$.post('/delete_most_important_contact', {
+								"index": index,
+								"person_uuid": app.person_uuid
+							}, function(data) {
+								app.most_important_contacts = data
+							});
+						},
+						addMostImportantContact: function(event) {
+							$.post('/add_most_important_contact', {
+								"person_uuid": app.person_uuid,
+								"name": $('#add_most_important_contact_name').val(),
+								"relationship": $('#add_most_important_contact_relationship').val(),
+								"phone_number": $('#add_most_important_contact_phone_number').val(),
+								"email": $('#add_most_important_contact_email').val(),
+								"notes": $('#add_most_important_contact_notes').val()
+							}, function(data) {
+								app.most_important_contacts = data
+								$('#add_most_important_contact_name').val('')
+								$('#add_most_important_contact_relationship').val('')
+								$('#add_most_important_contact_phone_number').val('')
+								$('#add_most_important_contact_email').val('')
+								$('#add_most_important_contact_notes').val('')
+							})
+						},
+						editAMostImportantContact: function(index) {
+							$.post('/edit_most_important_contact', {
+								"person_uuid": app.person_uuid,
+								"index": index,
+								"name": $('#edit-most-important-contact-name-' + index).val(),
+								"relationship": $('#edit-most-important-contact-relationship-' + index).val(),
+								"phone_number": $('#edit-most-important-contact-phone-number-' + index).val(),
+								"email": $('#edit-most-important-contact-email-' + index).val(),
+								"notes": $('#edit-most-important-contact-notes-' + index).val(),
+								"is_professional": $('#edit-most-important-contact-is-professional-' + index).is(':checked'),
+							}, function(data) {
+								app.editMostImportantContact = -1;
+								app.most_important_contacts = data;
+							})
+						},
+						moveMostImportantContactUpwards: function(index) {
+							$.post('/move_most_important_contact_upwards', {
+								"person_uuid": app.person_uuid,
+								"index": index,
+							}, function(data) {
+								app.most_important_contacts = data
+							})
 						},
 						deleteContact: function(index) {
 							$.post('/delete_contact', {
@@ -679,7 +730,80 @@
 						</td>
 					</tr>
 				</table>
-				<h3 id="contacts">Contacts (<template v-if="contacts">[[ contacts.length ]]</template>)</h3>  <strong>Name:</strong>
+				<h3 id="contacts">Contacts </h3>  
+				<h4>Most important contacts</h4>
+				<strong>Add contact: </strong><strong>Name:</strong>
+				<input type="text" id="add_most_important_contact_name" /> <strong>Relationship:</strong>
+				<input type="text" id="add_most_important_contact_relationship" /> <strong>Phone number:</strong>
+				<input type="text" id="add_most_important_contact_phone_number" /> <strong>Email:</strong>
+				<input type="text" id="add_most_important_contact_email" /> <strong>Notes:</strong>
+				<textarea id="add_most_important_contact_notes"></textarea>
+				<button @click="addMostImportantContact">Add contact</button>
+				<table id="most_important_contacts">
+					<tr>
+						<th>Name</th>
+						<th>Relationship</th>
+						<th>Phone number</th>
+						<th>Email</th>
+						<th>Notes</th>
+						<th>Is professional who is involved in his care</th>
+						<th></th>
+					</tr>
+					<tr v-for="(contact, index) in most_important_contacts" v-bind:class="{professional: contact.is_professional}">
+						<td>
+							<template v-if="index == editMostImportantContact">
+								<input type="text" v-bind:id="'edit-most-important-contact-name-'+index" v-bind:value="contact.name">
+							</template>
+							<template v-else>[[ contact.name ]]</template>
+						</td>
+						<td>
+							<template v-if="index == editMostImportantContact">
+								<input type="text" v-bind:id="'edit-most-important-contact-relationship-'+index" v-bind:value="contact.relationship">
+							</template>
+							<template v-else>[[ contact.relationship ]]</template>
+						</td>
+						<td>
+							<template v-if="index == editMostImportantContact">
+								<input type="text" v-bind:id="'edit-most-important-contact-phone-number-'+index" v-bind:value="contact.phone_number">
+							</template>
+							<template v-else> <a v-bind:href="'tel:+1'+contact.phone_number">[[ contact.phone_number ]]</a>
+						</td>
+						</template>
+						</td>
+						<td>
+							<template v-if="index == editMostImportantContact">
+								<input type="text" v-bind:id="'edit-most-important-contact-email-'+index" v-bind:value="contact.email">
+							</template>
+							<template v-else> <a v-bind:href="'mailto:'+contact.email">
+          [[ contact.email ]]</a>
+							</template>
+						</td>
+						<td>
+							<template v-if="index == editMostImportantContact">
+								<textarea v-bind:id="'edit-most-important-contact-notes-'+index">[[ contact.notes ]]</textarea>
+							</template>
+							<template v-else>[[ contact.notes ]]</template>
+						</td>
+						<td>
+							<template v-if="index == editMostImportantContact">
+								<input type="checkbox" v-bind:checked="contact.is_professional" v-bind:id="'edit-contact-is-professional-'+index">
+							</template>
+							<template v-if="contact.is_professional">Professional</template>
+						</td>
+						<td>
+							<template v-if="index == editMostImportantContact">
+								<button @click="editAMostImportantContact(index)">Save</button>
+							</template>
+							<template v-else>
+								<button @click="editMostImportantContact = index">Edit</button>
+							</template>
+							<template v-if="index != 0"><button @click="moveMostImportantContactUpwards(index)">&#x2191;</button></template>
+							<button @click="deleteContact(index)">X</button>
+						</td>
+					</tr>
+				</table>
+				<h4>Other contacts</h4>
+				<strong>Add contact: </strong><strong>Name:</strong>
 				<input type="text" id="add_contact_name" /> <strong>Relationship:</strong>
 				<input type="text" id="add_contact_relationship" /> <strong>Phone number:</strong>
 				<input type="text" id="add_contact_phone_number" /> <strong>Email:</strong>
