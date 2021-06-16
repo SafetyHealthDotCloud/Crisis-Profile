@@ -126,9 +126,9 @@
 						if(app.is_admin) {
 							app.getApprovedProfessionals()
 						}
-					} else {
-						//app.sentLoginEmail = false;
-						//app.loggedIn = false;
+						app.alreadyLoggedin = true
+					} elif (alreadyLoggedin) {
+						window.location = '/'
 					}
 				})
 			}
@@ -136,6 +136,7 @@
 			const App = {
 				data() {
 						return {
+							alreadyLoggedin: false,
 							sentLoginEmail: false,
 							email: '',
 							loggedIn: false,
