@@ -260,7 +260,7 @@ def send_login_email():
             % (os.getenv("API_EMAIL_DOMAIN_NAME")),
             "to": ["%s" % (request.form.get('email'))],
             "subject": "Login code for Crisis Profile",
-            "text": 'Hi! This is a login email for logging into Crisis Profile. Enter the code: %s on https://crisisprofile.com'
+            "text": 'Hi! This is a login email for logging into Crisis Profile. Copy and paste the code: %s on Crisis Profile'
             % (
                 verification_token,
             ),
@@ -272,10 +272,7 @@ def send_login_email():
 def load_user(userid):
     return User.query.filter_by(id=userid).first()
 
-@app.route('/get_profile', methods=['GET'])
-@login_required
-def get_profile():
-    person = Person.query.filter_by(id=request.args['person_id']).first()
+def add_to_audit_trail(person, what, details=None):
     from datetime import datetime
     import pytz
     
@@ -285,9 +282,15 @@ def get_profile():
     now = la_timezone.normalize(now_utc.astimezone(la_timezone)).strftime("%m/%d/%Y %H:%M:%S")
     if not person.audit_trail:
         person.audit_trail = []
-    person.audit_trail.append({'email': current_user.email_address, 'what': 'accessed profile', 'datetime': now})
+    person.audit_trail.append({'email': current_user.email_address, 'what': what, 'datetime': now})
     flag_modified(person, "audit_trail")
     db.session.commit()
+
+@app.route('/get_profile', methods=['GET'])
+@login_required
+def get_profile():
+    person = Person.query.filter_by(id=request.args['person_id']).first()
+    add_to_audit_trail(person, 'accessed profile')
     return jsonify(person.to_json())
 
 @app.route('/get_approved_professionals', methods=['GET'])
@@ -352,6 +355,7 @@ def edit_basic_information():
     above_elements['persons_phone_numbers'] = person.persons_phone_numbers
     flag_modified(person, "persons_phone_numbers")
     db.session.commit()
+    add_to_audit_trail(person, 'edited basic information')
     return jsonify(above_elements)
 
 @app.route('/edit_bio', methods=['POST'])
@@ -361,6 +365,7 @@ def edit_bio():
     person = Person.query.get(person_uuid)
     person.bio = request.form['bio']
     db.session.commit()
+    add_to_audit_trail(person, 'edited bio')
     return jsonify({'bio': person.bio})
 
 @app.route('/edit_safety_information', methods=['POST'])
@@ -370,6 +375,7 @@ def edit_safety_information():
     person = Person.query.get(person_uuid)
     person.safety_information = request.form['safety_information']
     db.session.commit()
+    add_to_audit_trail(person, 'edited safety information')
     return jsonify({'safety_information': person.safety_information})
 
 @app.route('/edit_deescalation_plan', methods=['POST'])
@@ -379,6 +385,7 @@ def edit_deescalation_plan():
     person = Person.query.get(person_uuid)
     person.deescalation_instructions = request.form['deescalation_plan']
     db.session.commit()
+    add_to_audit_trail(person, 'edited de-escalation plan')
     return jsonify({'deescalation_plan': person.deescalation_instructions})
 
 from sqlalchemy import and_, or_, not_
@@ -397,6 +404,7 @@ def edit_precall_coping():
     person = Person.query.get(person_uuid)
     person.coping_techniques_to_use_before_calling_for_help = request.form['coping_techniques_to_use_before_calling_for_help']
     db.session.commit()
+    add_to_audit_trail(person, 'edited personal coping techniques')
     return jsonify({'coping_techniques_to_use_before_calling_for_help': person.coping_techniques_to_use_before_calling_for_help})
 
 @app.route('/edit_mental_health_treatment', methods=['POST'])
@@ -406,6 +414,7 @@ def edit_mental_health_treatment():
     person = Person.query.get(person_uuid)
     person.mental_health_treatment_summary = request.form['mental_health_treatment_summary']
     db.session.commit()
+    add_to_audit_trail(person, 'edited mental health treatment summary')
     return jsonify({'mental_health_treatment_summary': person.mental_health_treatment_summary})
 
 @app.route('/edit_medication_notes', methods=['POST'])
@@ -415,6 +424,7 @@ def edit_medication_notes():
     person = Person.query.get(person_uuid)
     person.medication_notes = request.form['medication_notes']
     db.session.commit()
+    add_to_audit_trail(person, 'edited medication notes')
     return jsonify({'medication_notes': person.medication_notes})
 
 @app.route('/add_person', methods=['POST'])
@@ -440,6 +450,7 @@ def add_medication():
     person.medications = medications
     flag_modified(person, "medications")
     db.session.commit()
+    add_to_audit_trail(person, 'added medication')
     return jsonify(medications)
 
 @app.route('/delete_medication', methods=['POST'])
@@ -452,6 +463,7 @@ def delete_medication():
     person.medications = medications
     flag_modified(person, "medications")
     db.session.commit()
+    add_to_audit_trail(person, 'deleted medication')
     return jsonify(medications)
 
 
@@ -465,6 +477,7 @@ def delete_appointment():
     person.appointments = appointments
     flag_modified(person, "appointments")
     db.session.commit()
+    add_to_audit_trail(person, 'deleted appointment')
     return jsonify(appointments)
 
 
@@ -478,6 +491,7 @@ def delete_most_important_contact():
     person.most_important_contacts = contacts
     flag_modified(person, "most_important_contacts")
     db.session.commit()
+    add_to_audit_trail(person, 'deleted an important contact')
     return jsonify(contacts)    
 
 @app.route('/add_most_important_contact', methods=['POST'])
@@ -492,6 +506,7 @@ def add_most_important_contact():
     person.most_important_contacts = contacts
     flag_modified(person, "most_important_contacts")
     db.session.commit()
+    add_to_audit_trail(person, 'added an important contact')
     return jsonify(contacts)
 
 @app.route('/edit_most_important_contact', methods=['POST'])
@@ -504,6 +519,7 @@ def edit_most_important_contact():
     person.most_important_contacts = contacts
     flag_modified(person, "most_important_contacts")
     db.session.commit()
+    add_to_audit_trail(person, 'edited important contact')
     return jsonify(contacts)  
 
 
@@ -522,6 +538,7 @@ def move_most_important_contact_upwards():
     person.most_important_contacts = contacts
     flag_modified(person, "most_important_contacts")
     db.session.commit()
+    add_to_audit_trail(person, 'moved important contact upwards')
     return jsonify(contacts)  
 
 @app.route('/add_appointment', methods=['POST'])
@@ -537,6 +554,7 @@ def add_appointment():
     person.appointments = appointments
     flag_modified(person, "appointments")
     db.session.commit()
+    add_to_audit_trail(person, 'added appointment')
     return jsonify(appointments)
 
 @app.route('/delete_contact', methods=['POST'])
@@ -549,6 +567,7 @@ def delete_contact():
     person.contacts = contacts
     flag_modified(person, "contacts")
     db.session.commit()
+    add_to_audit_trail(person, 'deleted contact')
     return jsonify(contacts)    
 
 @app.route('/add_contact', methods=['POST'])
@@ -563,6 +582,7 @@ def add_contact():
     person.contacts = contacts
     flag_modified(person, "contacts")
     db.session.commit()
+    add_to_audit_trail(person, 'added contact')
     return jsonify(contacts)
 
 @app.route('/edit_contact', methods=['POST'])
@@ -575,6 +595,7 @@ def edit_contact():
     person.contacts = contacts
     flag_modified(person, "contacts")
     db.session.commit()
+    add_to_audit_trail(person, 'edited contact')
     return jsonify(contacts)  
 
 @app.route('/move_contact_upwards', methods=['POST'])
@@ -591,6 +612,7 @@ def move_contact_upwards():
     person.contacts = contacts
     flag_modified(person, "contacts")
     db.session.commit()
+    add_to_audit_trail(person, 'moved contact upwards')
     return jsonify(contacts)       
 
 @app.route('/login', methods=['POST'])
