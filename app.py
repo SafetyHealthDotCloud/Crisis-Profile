@@ -223,14 +223,9 @@ class Person(db.Model):
 
         return data
 
-
-
 @app.route("/static/<path:path>")
 def send_static(path):
     return send_from_directory("static", path)
-
-
-
 
 @app.route("/send_login_email", methods=["POST"])
 def send_login_email():
