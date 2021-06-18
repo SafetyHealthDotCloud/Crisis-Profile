@@ -542,6 +542,7 @@
 					<button @click="bookmarkThisPerson">Bookmark this person</button>
 				</template>
 				<br/>
+				<div>
 				<template v-if="isEditBasicInformation">
 					<button @click="editBasicInformation()">Save basic information</button>
 					<br/> <strong>First name:</strong>
@@ -585,6 +586,8 @@
                 <a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
         </span> 
 				</template>
+			</div>
+				<div style="position:fixed;width:200px; float:left;padding:5px;border:solid 1px red;margin:5px 5px 5px 0;">
 				<h3>Table of contents</h3>
 				<ul id="toc">
 					
@@ -605,7 +608,8 @@
 					</li>
 					<li><a href="#audit_trail">Audit trail</a></li>
 				</ul>
-				
+			</div>
+			<div style="margin-left:220px;">
 				<h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
         <button @click="editSafetyInformation()">Save edits</button>
       </template>
@@ -652,7 +656,7 @@
 				</template>
 				<template v-else> <pre>[[ coping_techniques_to_use_before_calling_for_help ]]</pre> 
 				</template>
-				<h3 id="mental_health_treatment_summary">Mental health treatment summary
+				<h3 id="mental-health-treatment-summary">Mental health treatment summary
         <template v-if="isEditMentalHealthTreatment">
           <button @click="editMentalHealthTreatment">Save edit</button>
         </template>
@@ -887,6 +891,7 @@
 						<td>[[ event.what ]]</td>
 					</tr>
 				</table>
+				</div>
 			</div>
 			<div v-else-if="is_professional">
 				
