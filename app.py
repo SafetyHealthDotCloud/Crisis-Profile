@@ -292,6 +292,7 @@ def add_diangosis():
     person.diagnoses.append({"diagnosis": request.form['diagnosis'], "definition": request.form['definition'], "how_presents": request.form['how_presents']})
     flag_modified(person, "diagnoses")
     db.session.commit()
+    add_to_audit_trail(person, 'added diagnosis')
     return jsonify(person.diagnoses)
 
 @app.route('/get_profile', methods=['GET'])

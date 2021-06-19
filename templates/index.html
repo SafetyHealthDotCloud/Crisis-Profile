@@ -338,6 +338,9 @@
 								"how_presents": $('#add-diagnosis-how-presents').val()
 							}, function(data) {
 								app.diagnoses = data
+								$('#add-diagnosis').val('')
+								$('#add-diagnosis-definition').val('')
+								$('#add-diagnosis-how-presents').val('')
 							})
 						},
 						editMentalHealthTreatment: function(event) {
