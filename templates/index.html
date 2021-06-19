@@ -169,6 +169,7 @@
 							audit_trail: [],
 							bio: '',
 							deescalation_plan: '',
+							diagnoses: [],
 						}
 					},
 					created: function() {
@@ -214,6 +215,7 @@
 								app.audit_trail = data.audit_trail
 								app.bio = data.bio
 								app.deescalation_plan = data.deescalation_plan
+								app.diagnoses = data.diagnoses
 							});
 						},
 						bookmarkThisPerson: function(event) {
@@ -326,6 +328,16 @@
 							}, function(data) {
 								app.isEditPrecallCoping = false
 								app.coping_techniques_to_use_before_calling_for_help = data.coping_techniques_to_use_before_calling_for_help
+							})
+						},
+						addDiagnosis: function(event) {
+							$.post('/add_diangosis', {
+								"person_uuid": app.person_uuid,
+								"diagnosis": $('#add-diagnosis').val(),
+								"definition": $('#add-diagnosis-definition').val(),
+								"how_presents": $('#add-diagnosis-how-presents').val()
+							}, function(data) {
+								app.diagnoses = data
 							})
 						},
 						editMentalHealthTreatment: function(event) {
@@ -596,8 +608,9 @@
 
 					<li><a href="#de-escalation-plan">De-escalation plan</a></li>
 					<li><a href="#bio">Bio</a></li>
-					<li><a href="#precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)</a>
+					<li><a href="#precall-coping">Personal crisis prevention and de-escalation plan</a>
 					</li>
+					<li><a href="#diagnoses">Diagnoses</a></li>
 					<li><a href="#mental-health-treatment-summary">Mental health treatment summary</a>
 					</li>
 					<li><a href="#medications">Medications</a>
@@ -656,6 +669,23 @@
 				</template>
 				<template v-else> <pre>[[ coping_techniques_to_use_before_calling_for_help ]]</pre> 
 				</template>
+
+				<h3 id="diagnoses">Diagnoses</h3>
+							
+								<strong>Diagnosis:</strong>	<input type="text" id="add-diagnosis"> 
+								<strong>Diagnosis definition:</strong> <textarea id="add-diagnosis-definition"></textarea>
+								<strong>How the diagnosis presents itself:</strong> <textarea id="add-diagnosis-how-presents"></textarea>
+							    <button @click="addDiagnosis">Add diagnosis</button>
+							
+								<table><tr><th>Diagnosis</th>
+									<th>Definition</th>
+									<th>How it presents itself in this person</th></tr>
+									<tr v-for="diagnosis in diagnoses">
+										<td>[[ diagnosis.diagnosis ]]</td>
+										<td>[[ diagnosis.definition ]]</td>
+										<td>[[ diagnosis.how_presents ]]</td>
+									</tr>
+								</table>
 				<h3 id="mental-health-treatment-summary">Mental health treatment summary
         <template v-if="isEditMentalHealthTreatment">
           <button @click="editMentalHealthTreatment">Save edit</button>

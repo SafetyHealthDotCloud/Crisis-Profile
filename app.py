@@ -218,6 +218,7 @@ class Person(db.Model):
         data['medication_notes'] = self.medication_notes
         data['appointments'] = self.appointments
         data['audit_trail'] = self.audit_trail
+        data['diagnoses'] = self.diagnoses
         data['bio'] = self.bio
         data['deescalation_plan'] = self.deescalation_instructions
 
@@ -280,6 +281,18 @@ def add_to_audit_trail(person, what, details=None):
     person.audit_trail.append({'email': current_user.email_address, 'what': what, 'datetime': now})
     flag_modified(person, "audit_trail")
     db.session.commit()
+
+@app.route('/add_diangosis', methods=['POST'])
+@login_required
+def add_diangosis():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.filter_by(id=person_uuid).first()
+    if not person.diagnoses:
+        person.diagnoses = []
+    person.diagnoses.append({"diagnosis": request.form['diagnosis'], "definition": request.form['definition'], "how_presents": request.form['how_presents']})
+    flag_modified(person, "diagnoses")
+    db.session.commit()
+    return jsonify(person.diagnoses)
 
 @app.route('/get_profile', methods=['GET'])
 @login_required
