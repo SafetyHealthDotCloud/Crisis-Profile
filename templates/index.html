@@ -160,6 +160,8 @@
 							isEditMentalHealthTreatment: false,
 							isEditMedicationNotes: false,
 							isEditDeescalationPlan: false,
+							isEditBaselineBehavior: false,
+							isEditTriggers: false,
 							appointments: [],
 							person_uuid: null,
 							bookmarked_people: [],
@@ -170,6 +172,8 @@
 							bio: '',
 							deescalation_plan: '',
 							diagnoses: [],
+							baseline_behavior: '',
+							triggers: '',
 						}
 					},
 					created: function() {
@@ -216,6 +220,8 @@
 								app.bio = data.bio
 								app.deescalation_plan = data.deescalation_plan
 								app.diagnoses = data.diagnoses
+								app.baseline_behavior = data.mental_health_baseline_behavior
+								app.triggers = data.mental_health_triggers
 							});
 						},
 						bookmarkThisPerson: function(event) {
@@ -341,6 +347,25 @@
 								$('#add-diagnosis').val('')
 								$('#add-diagnosis-definition').val('')
 								$('#add-diagnosis-how-presents').val('')
+							})
+						},
+						editBaselineBehavior: function(event) {
+							$.post('/edit_baseline_behavior', {
+								"person_uuid": app.person_uuid,
+								'baseline_behavior': $('#edit-baseline-behavior').val()
+							}, function(data) {
+								app.isEditBaselineBehavior = false
+								app.baseline_behavior = data.baseline_behavior
+							})
+						},
+						editTriggers: function(event) {
+							$.post('/edit_triggers', {
+								"person_uuid": app.person_uuid,
+								'triggers': $('#edit-triggers').val()
+							}, function(data) {
+								console.log(JSON.stringify(data))
+								app.isEditTriggers = false
+								app.triggers = data.triggers
 							})
 						},
 						editMentalHealthTreatment: function(event) {
@@ -614,6 +639,9 @@
 					<li><a href="#precall-coping">Personal crisis prevention and de-escalation plan</a>
 					</li>
 					<li><a href="#diagnoses">Diagnoses</a></li>
+					<li><a href="#baseline-behavior">Baseline behavior</a></li>
+					<li><a href="#triggers">Triggers</a></li>
+					
 					<li><a href="#mental-health-treatment-summary">Mental health treatment summary</a>
 					</li>
 					<li><a href="#medications">Medications</a>
@@ -689,7 +717,35 @@
 										<td>[[ diagnosis.how_presents ]]</td>
 									</tr>
 								</table>
-				<h3 id="mental-health-treatment-summary">Mental health treatment summary
+								<h3 id="baseline-behavior">Baseline behavior
+									<template v-if="isEditBaselineBehavior">
+									  <button @click="editBaselineBehavior">Save edit</button>
+									</template>
+									<template v-else>
+									  <button @click="isEditBaselineBehavior = true">Edit</button>
+									</template>
+							
+								  </h3>
+											<template v-if="isEditBaselineBehavior">
+												<textarea id="edit-baseline-behavior" style="width:100%;height:200px;">[[ baseline_behavior ]]</textarea>
+											</template>
+											<template v-else> <pre>[[ baseline_behavior ]]</pre>
+											</template>
+											<h3 id="triggers">Triggers
+												<template v-if="isEditTriggers">
+												  <button @click="editTriggers">Save edit</button>
+												</template>
+												<template v-else>
+												  <button @click="isEditTriggers = true">Edit</button>
+												</template>
+										
+											  </h3>
+														<template v-if="isEditTriggers">
+															<textarea id="edit-triggers" style="width:100%;height:200px;">[[ triggers ]]</textarea>
+														</template>
+														<template v-else> <pre>[[ triggers ]]</pre>
+														</template>
+								<h3 id="mental-health-treatment-summary">Mental health treatment summary
         <template v-if="isEditMentalHealthTreatment">
           <button @click="editMentalHealthTreatment">Save edit</button>
         </template>

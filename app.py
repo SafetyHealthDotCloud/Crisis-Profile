@@ -14,7 +14,6 @@ import json
 from sqlalchemy.orm.attributes import flag_modified
 from flask import current_app as app, flash, redirect, render_template, session
 from flask_login import login_manager, login_required, logout_user
-
 app = Flask(__name__, static_url_path="", static_folder="static")
 
 SECRET_KEY = os.urandom(32)
@@ -173,8 +172,8 @@ class Person(db.Model):
     safety_information = db.Column(db.String(), nullable=True)
     deescalation_instructions = db.Column(db.String(), nullable=True)
     documents = db.Column(JSON(), nullable=True)
-    mental_health_triggers = db.Column(JSON(), nullable=True)
-    mental_health_baseline_behavior = db.Column(JSON(), nullable=True)
+    mental_health_triggers = db.Column(db.String(), nullable=True)
+    mental_health_baseline_behavior = db.Column(db.String(), nullable=True)
     no_contact_orders = db.Column(JSON(), nullable=True)
     coping_techniques_to_use_before_calling_for_help = db.Column(db.String(), nullable=True)
     mental_health_treatment_summary = db.Column(db.String(), nullable=True)
@@ -202,7 +201,7 @@ class Person(db.Model):
         data['preferred_name'] = self.preferred_name
         data['preferred_gender_pronouns'] = self.preferred_gender_pronouns
         data['date_of_birth'] = self.date_of_birth.strftime("%B %-d, %Y") if self.date_of_birth else ''
-        data['age'] = calculate_age(self.date_of_birth.date())  if self.date_of_birth else ''
+        data['age'] = calculate_age(self.date_of_birth)  if self.date_of_birth else ''
         data['most_important_contacts'] = self.most_important_contacts
         data['contacts'] = self.contacts
         data['persons_phone_numbers'] = self.persons_phone_numbers
@@ -221,7 +220,8 @@ class Person(db.Model):
         data['diagnoses'] = self.diagnoses
         data['bio'] = self.bio
         data['deescalation_plan'] = self.deescalation_instructions
-
+        data['mental_health_baseline_behavior'] = self.mental_health_baseline_behavior
+        data['mental_health_triggers'] = self.mental_health_triggers
         return data
 
 @app.route("/static/<path:path>")
@@ -415,6 +415,27 @@ def edit_precall_coping():
     db.session.commit()
     add_to_audit_trail(person, 'edited personal coping techniques')
     return jsonify({'coping_techniques_to_use_before_calling_for_help': person.coping_techniques_to_use_before_calling_for_help})
+
+@app.route('/edit_baseline_behavior', methods=['POST'])
+@login_required
+def edit_baseline_behavior():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.mental_health_baseline_behavior = request.form['baseline_behavior']
+    db.session.commit()
+    add_to_audit_trail(person, 'edited baseline behavior')
+    return jsonify({'baseline_behavior': person.mental_health_baseline_behavior})
+
+@app.route('/edit_triggers', methods=['POST'])
+@login_required
+def edit_triggers():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    person.mental_health_triggers = request.form['triggers']
+    db.session.commit()
+    add_to_audit_trail(person, 'edited triggers')
+    return jsonify({'triggers': person.mental_health_triggers})
+
 
 @app.route('/edit_mental_health_treatment', methods=['POST'])
 @login_required
