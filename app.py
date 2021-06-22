@@ -138,6 +138,7 @@ class Person(db.Model):
     photographs = db.Column(JSON(), nullable=True)
     date_of_birth = db.Column(db.Date())
     persons_phone_numbers = db.Column(JSON(), nullable=True)
+    persons_email_address = db.Column(db.String(), nullable=True)
     current_physical_living_address_1 = db.Column(db.String(), nullable=True)
     current_physical_living_address_2 = db.Column(db.String(), nullable=True)
     current_physical_living_address_city = db.Column(db.String(), nullable=True)
@@ -163,9 +164,7 @@ class Person(db.Model):
     contacts = db.Column(JSON(), nullable=True) # keys: name, relationship_to_person, phone_numbers (keys: phone_number, type), address
     audit_trail = db.Column(JSON(), nullable=True) # log all access to the person's data (keys: email_address, ip, datetime, did_what, reason_for_access, agency, CAD_number, RMS_number)
     incidents = db.Column(JSON(), nullable=True)
-    allergies = db.Column(JSON(), nullable=True)
-    medical_conditions = db.Column(JSON(), nullable=True)
-    mental_health_conditions = db.Column(JSON(), nullable=True)
+    allergies = db.Column(db.String(), nullable=True)
     languages = db.Column(JSON(), nullable=True)
     medications = db.Column(JSON(), nullable=True)
     appointments = db.Column(JSON(), nullable=True)
@@ -184,6 +183,7 @@ class Person(db.Model):
     stressors = db.Column(JSON(), nullable=True)
     diagnoses = db.Column(JSON(), nullable=True)
     bio = db.Column(db.String(), nullable=True)
+    religion = db.Column(db.String(), nullable=True)
 
     def __init__(self, first_name, middle_name, last_name, birthdate):
         self.first_name = first_name
@@ -205,6 +205,7 @@ class Person(db.Model):
         data['most_important_contacts'] = self.most_important_contacts
         data['contacts'] = self.contacts
         data['persons_phone_numbers'] = self.persons_phone_numbers
+        data['persons_email_address'] = self.persons_email_address
         data['current_physical_living_address_1'] = self.current_physical_living_address_1
         data['current_physical_living_address_2'] = self.current_physical_living_address_2
         data['current_physical_living_address_city'] = self.current_physical_living_address_city
@@ -350,6 +351,7 @@ def edit_basic_information():
     person.current_physical_living_address_state = request.form['current_physical_living_address_state']
     person.current_physical_living_address_zip_code = request.form['current_physical_living_address_zip_code']
     person.persons_phone_numbers = [{"phone_number": request.form["phone_number_0"], "type": request.form["phone_number_type_0"]}]
+    person.persons_email_address = request.form['persons_email_address']
     above_elements = {}
     above_elements['first_name'] = person.first_name
     above_elements['middle_name'] = request.form['middle_name']
@@ -362,6 +364,7 @@ def edit_basic_information():
     above_elements['current_physical_living_address_state'] = request.form['current_physical_living_address_state']
     above_elements['current_physical_living_address_zip_code'] = request.form['current_physical_living_address_zip_code']
     above_elements['persons_phone_numbers'] = person.persons_phone_numbers
+    above_elements['persons_email_address'] = person.persons_email_address
     flag_modified(person, "persons_phone_numbers")
     db.session.commit()
     add_to_audit_trail(person, 'edited basic information')
@@ -696,6 +699,8 @@ def home():
 @app.route('/add_professional_domain', methods=["POST"])
 @login_required
 def add_professional_domain():
+    if not current_user.is_admin:
+        return
     domain = ApprovedWorkEmailAddressDomain(request.form['domain'])
     db.session.add(domain)
     db.session.commit()
@@ -704,6 +709,8 @@ def add_professional_domain():
 @app.route('/add_professional_email_address', methods=["POST"])
 @login_required
 def add_professional_email_address():
+    if not current_user.is_admin:
+        return
     email = ApprovedWorkEmailAddress(request.form['email'])
     db.session.add(email)
     db.session.commit()

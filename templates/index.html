@@ -83,6 +83,8 @@
 			margin-bottom: 10px
 		}
 		
+		h3 { font-size:1.25em }
+
 		#toc {
 			list-style-type: square;
 			padding-left: 20px
@@ -108,6 +110,12 @@
 			padding: 5px;
 			vertical-align: top;
 		}
+
+
+	</style>
+	<style media="screen">
+		#tocdiv {position:fixed;width:200px; float:left;padding:5px;border:solid 1px red;margin:5px 5px 5px 0;}
+		#main-of-profile {margin-left:220px;}
 	</style>
 	<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 	<script>
@@ -148,6 +156,7 @@
 							date_of_birth: '',
 							age: '',
 							persons_phone_numbers: [],
+							persons_email_address: '',
 							most_important_contacts: [],
 							contacts: [],
 							medications: [],
@@ -174,6 +183,7 @@
 							diagnoses: [],
 							baseline_behavior: '',
 							triggers: '',
+
 						}
 					},
 					created: function() {
@@ -199,6 +209,7 @@
 								app.date_of_birth = data.date_of_birth
 								app.age = data.age
 								app.persons_phone_numbers = data.persons_phone_numbers
+								app.persons_email_address = data.persons_email_address
 								app.most_important_contacts = data.most_important_contacts
 								app.contacts = data.contacts
 								app.current_physical_living_address_1 = data.current_physical_living_address_1
@@ -285,6 +296,7 @@
 								"current_physical_living_address_zip_code": $('#edit-current-physical-living-address-zip-code').val(),
 								"phone_number_0": $('#edit-phone-number-0').val(),
 								"phone_number_type_0": $('#edit-phone-number-type-0').val(),
+								"persons_email_address": $('#edit-persons-email-address').val(),
 							}, function(data) {
 								app.isEditBasicInformation = false
 								app.first_name = data.first_name
@@ -298,6 +310,7 @@
 								app.current_physical_living_address_state = data.current_physical_living_address_state
 								app.current_physical_living_address_zip_code = data.current_physical_living_address_zip_code
 								app.persons_phone_numbers = data.persons_phone_numbers
+								app.persons_email_address = data.persons_email_address
 							})
 						},
 						editBio: function(event) {
@@ -611,7 +624,8 @@
 					<br/> <strong>Phone number(s):</strong>  <span v-for="(phone_number, index) in persons_phone_numbers">
                 <input type="text" v-bind:id="'edit-phone-number-'+index" v-bind:value="phone_number.phone_number"> 
                 (<strong>Phone type:</strong> <input tye="text" v-bind:id="'edit-phone-number-type-'+index" v-bind:value="phone_number.type">)
-        </span> 
+		</span> 
+		<br/> <strong>Email address:</strong> <input type="text" id="edit-persons-email-address">
 				</template>
 				<template v-else>
 					<button @click="isEditBasicInformation = true">Edit basic information</button>
@@ -623,11 +637,13 @@
         [[ current_physical_living_address_state ]],
         [[ current_physical_living_address_zip_code ]]</a>
 					<br/> <strong>Phone number(s):</strong>  <span v-for="phone_number in persons_phone_numbers">
+						
                 <a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
-        </span> 
+		</span> 
+		<br/> <strong>Email address:</strong> <a v-bind:href="'mailto:'+persons_email_address">[[ persons_email_address ]]</a>
 				</template>
 			</div>
-				<div style="position:fixed;width:200px; float:left;padding:5px;border:solid 1px red;margin:5px 5px 5px 0;">
+				<div id="tocdiv">
 				<h3>Table of contents</h3>
 				<ul id="toc">
 					
@@ -653,7 +669,7 @@
 					<li><a href="#audit_trail">Audit trail</a></li>
 				</ul>
 			</div>
-			<div style="margin-left:220px;">
+			<div id="main-of-profile">
 				<h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
         <button @click="editSafetyInformation()">Save edits</button>
       </template>
