@@ -178,7 +178,7 @@ class Person(db.Model):
     mental_health_treatment_summary = db.Column(db.String(), nullable=True)
     medication_notes = db.Column(db.String(), nullable=True)
     preferred_psychiatric_inpatient_facility = db.Column(db.String(), nullable=True)
-    pets = db.Column(JSON(), nullable=True)
+    animals = db.Column(JSON(), nullable=True)
     promises_made_to_person = db.Column(JSON(), nullable=True)
     stressors = db.Column(JSON(), nullable=True)
     diagnoses = db.Column(JSON(), nullable=True)
@@ -223,6 +223,7 @@ class Person(db.Model):
         data['deescalation_plan'] = self.deescalation_instructions
         data['mental_health_baseline_behavior'] = self.mental_health_baseline_behavior
         data['mental_health_triggers'] = self.mental_health_triggers
+        data['animals'] = self.animals
         return data
 
 @app.route("/static/<path:path>")
@@ -295,6 +296,20 @@ def add_diangosis():
     db.session.commit()
     add_to_audit_trail(person, 'added diagnosis')
     return jsonify(person.diagnoses)
+
+@app.route('/add_animal', methods=['POST'])
+@login_required
+def add_animal():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.filter_by(id=person_uuid).first()
+    if not person.animals:
+        person.animals = []
+    person.animals.append({"name": request.form['name'], "type": request.form['type'], "notes": request.form['notes']})
+    flag_modified(person, "animals")
+    db.session.commit()
+    add_to_audit_trail(person, 'added animal')
+    return jsonify(person.animals)
+
 
 @app.route('/get_profile', methods=['GET'])
 @login_required

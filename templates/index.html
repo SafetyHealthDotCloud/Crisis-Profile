@@ -19,7 +19,8 @@
 		}
 		
 		.professional {
-			background: yellow
+			background: yellow;
+			-webkit-print-color-adjust: exact; 
 		}
 		
 		pre {
@@ -183,7 +184,7 @@
 							diagnoses: [],
 							baseline_behavior: '',
 							triggers: '',
-
+							animals: [],
 						}
 					},
 					created: function() {
@@ -233,6 +234,7 @@
 								app.diagnoses = data.diagnoses
 								app.baseline_behavior = data.mental_health_baseline_behavior
 								app.triggers = data.mental_health_triggers
+								app.animals = data.animals
 							});
 						},
 						bookmarkThisPerson: function(event) {
@@ -360,6 +362,19 @@
 								$('#add-diagnosis').val('')
 								$('#add-diagnosis-definition').val('')
 								$('#add-diagnosis-how-presents').val('')
+							})
+						},
+						addAnimal: function(event) {
+							$.post('/add_animal', {
+								"person_uuid": app.person_uuid,
+								"name": $('#add-animal-name').val(),
+								"type": $('#add-animal-type').val(),
+								"notes": $('#add-animal-notes').val()
+							}, function(data) {
+								app.animals = data
+								$('#add-animal-name').val('')
+								$('#add-animal-type').val('')
+								$('#add-animal-notes').val('')
 							})
 						},
 						editBaselineBehavior: function(event) {
@@ -652,6 +667,7 @@
 
 					<li><a href="#de-escalation-plan">De-escalation plan</a></li>
 					<li><a href="#bio">Bio</a></li>
+					<li><a href="#animals">Animals</a></li>
 					<li><a href="#precall-coping">Personal crisis prevention and de-escalation plan</a>
 					</li>
 					<li><a href="#diagnoses">Diagnoses</a></li>
@@ -703,6 +719,18 @@
 							</template>
 							<template v-else> <pre>[[ bio ]]</pre> 
 							</template>
+							<h3 id="animals">Animals</h3>
+							<strong>Add animal:</strong> <stong>Name:</stong> 
+							 <input type="text" id="add-animal-name"> 
+							 <strong>Type:</strong> <input type="text" id="add-animal-type"> 
+							<strong>Notes:</strong> <textarea id="add-animal-notes"></textarea>
+							<button @click="addAnimal">Add animal</button>
+							<table>
+								<tr><th>Name</th><th>Type</th><th>Notes</th></tr>
+								<tr v-for="animal in animals"><td>[[ animal.name ]]</td>
+								<td>[[ animal.type ]]</td>
+							<td>[[ animal.notes ]]</td></tr>
+							</table>
 				<h3 id="precall-coping">Coping techniques [[ preferred_name ]] has agreed to use before calling 911 ([[ preferred_name ]]'s personal crisis prevention and de-escalation plan)
         <template v-if="isEditPrecallCoping">
           <button @click="editPrecallCoping">Save edit</button>
