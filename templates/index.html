@@ -185,6 +185,7 @@
 							baseline_behavior: '',
 							triggers: '',
 							animals: [],
+							incidents: [],
 						}
 					},
 					created: function() {
@@ -235,6 +236,7 @@
 								app.baseline_behavior = data.mental_health_baseline_behavior
 								app.triggers = data.mental_health_triggers
 								app.animals = data.animals
+								app.incidents = data.incidents
 							});
 						},
 						bookmarkThisPerson: function(event) {
@@ -556,6 +558,21 @@
 								app.contacts = data
 							})
 						},
+						addIncident: function() {
+							$.post('/add_incident', {
+								'person_uuid': app.person_uuid,
+								'date': $('#add-incident-date').val(),
+								'type': $('#add-incident-type').val(),
+								'details': $('#add-incident-details').val(),
+								'what_learned': $('#add-incident-what-learned').val()
+							}, function(data) {
+								app.incidents = data
+								$('#add-incident-date').val('')
+								$('#add-incident-type').val('')
+								$('#add-incident-details').val('')
+								$('#add-incident-what-learned').val('')
+							})
+						},
 						addProfessionalDomain: function() {
 							$.post('/add_professional_domain', {
 								'domain': $('#add-professional-domain').val()
@@ -682,6 +699,8 @@
 					</li>
 					<li><a href="#contacts">Contacts</a>
 					</li>
+					<li><a href="#incidents">Incidents</a>
+					</li>
 					<li><a href="#audit_trail">Audit trail</a></li>
 				</ul>
 			</div>
@@ -720,7 +739,7 @@
 							<template v-else> <pre>[[ bio ]]</pre> 
 							</template>
 							<h3 id="animals">Animals</h3>
-							<strong>Add animal:</strong> <stong>Name:</stong> 
+							<strong>Add animal:</strong> <strong>Name:</strong> 
 							 <input type="text" id="add-animal-name"> 
 							 <strong>Type:</strong> <input type="text" id="add-animal-type"> 
 							<strong>Notes:</strong> <textarea id="add-animal-notes"></textarea>
@@ -1009,6 +1028,28 @@
 							<template v-if="index != 0"><button @click="moveContactUpwards(index)">&#x2191;</button></template>
 							<button @click="deleteContact(index)">X</button>
 						</td>
+					</tr>
+				</table>
+				<h3 id="incidents">Incidents</h3>
+				<strong>Add incident:</strong> <strong>Date:</strong>
+				<input type="text" id="add-incident-date">
+				<strong>Type:</strong>
+				<select id="add-incident-type">
+					<option value="Police involved">Police involved</option>
+					<option value="Uncontrolled crisis, no police involved">Uncontrolled crisis, no police involved</option>
+					<option value="Controlled crisis, no police involved">Controlled crisis, no police involved</option>
+				</select>
+				<strong>Details:</strong>
+				<textarea id="add-incident-details"></textarea>
+				<strong>What [[ preferred_name ]] learned:</strong>
+				<textarea id="add-incident-what-learned"></textarea>
+				<button @click="addIncident">Add incident</button>
+				<table v-if="incidents">
+					<tr><th>Date MM/DD/YYYY</th><th>Type</th><th>Details</th><th>What [[ preferred_name ]] learned</th></tr>
+					<tr v-for="incident in incidents.slice().reverse()"><td>[[ incident.date ]]</td>
+					<td>[[ incident.type ]]</td>
+					<td>[[ incident.details ]]</td>
+					<td>[[ incident.what_learned ]]</td>
 					</tr>
 				</table>
 				<h3 id="audit_trail">Audit trail</h3>

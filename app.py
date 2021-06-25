@@ -224,6 +224,7 @@ class Person(db.Model):
         data['mental_health_baseline_behavior'] = self.mental_health_baseline_behavior
         data['mental_health_triggers'] = self.mental_health_triggers
         data['animals'] = self.animals
+        data['incidents'] = self.incidents
         return data
 
 @app.route("/static/<path:path>")
@@ -310,6 +311,23 @@ def add_animal():
     add_to_audit_trail(person, 'added animal')
     return jsonify(person.animals)
 
+@app.route('/add_incident', methods=['POST'])
+@login_required
+def add_incident():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.filter_by(id=person_uuid).first()
+    if not person.incidents:
+        person.incidents = []
+    person.incidents.append({"date": request.form['date'], "type": request.form['type'], "details": request.form['details'], "what_learned": request.form['what_learned']})
+    incidents = person.incidents
+    try:
+        person.incidents = sorted(incidents, key=lambda x: datetime.datetime.strptime(x['date'], '%m/%d/%Y'))
+    except:
+        pass
+    flag_modified(person, "incidents")
+    db.session.commit()
+    add_to_audit_trail(person, 'added an incident')
+    return jsonify(person.incidents)
 
 @app.route('/get_profile', methods=['GET'])
 @login_required
