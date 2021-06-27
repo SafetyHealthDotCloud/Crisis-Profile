@@ -333,12 +333,16 @@ def add_incident():
 @login_required
 def get_profile():
     person = Person.query.filter_by(id=request.args['person_id']).first()
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     add_to_audit_trail(person, 'accessed profile')
     return jsonify(person.to_json())
 
 @app.route('/get_approved_professionals', methods=['GET'])
 @login_required
 def get_approved_professionals():
+    if not current_user.is_admin:
+        return jsonify({'error': True})
     data = {'domains': [row.email_address_domain for row in ApprovedWorkEmailAddressDomain.query.all()]}
     data['email_addresses'] = [row.email_address for row in ApprovedWorkEmailAddress.query.all()]
     return jsonify(data)
@@ -373,6 +377,8 @@ def unbookmark_this_person():
 def edit_basic_information():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.first_name = request.form['first_name']
     person.middle_name = request.form['middle_name']
     person.last_name = request.form['last_name']
@@ -408,6 +414,8 @@ def edit_basic_information():
 def edit_bio():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.bio = request.form['bio']
     db.session.commit()
     add_to_audit_trail(person, 'edited bio')
@@ -418,6 +426,8 @@ def edit_bio():
 def edit_safety_information():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.safety_information = request.form['safety_information']
     db.session.commit()
     add_to_audit_trail(person, 'edited safety information')
@@ -428,6 +438,8 @@ def edit_safety_information():
 def edit_deescalation_plan():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.deescalation_instructions = request.form['deescalation_plan']
     db.session.commit()
     add_to_audit_trail(person, 'edited de-escalation plan')
@@ -438,6 +450,8 @@ from sqlalchemy import and_, or_, not_
 @app.route('/search', methods=['GET'])
 @login_required
 def search():
+    if not current_user.is_professional:
+        return jsonify({'error': True})
     people = [{'id': person.id, 'first_name': person.first_name, 'middle_name': person.middle_name, 'last_name': person.last_name} for person in Person.query.filter(and_(Person.first_name.ilike(request.args['first_name']), Person.last_name.ilike(request.args['last_name'])))]
     return jsonify(people)
 
@@ -447,6 +461,8 @@ def search():
 def edit_precall_coping():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.coping_techniques_to_use_before_calling_for_help = request.form['coping_techniques_to_use_before_calling_for_help']
     db.session.commit()
     add_to_audit_trail(person, 'edited personal coping techniques')
@@ -457,6 +473,8 @@ def edit_precall_coping():
 def edit_baseline_behavior():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.mental_health_baseline_behavior = request.form['baseline_behavior']
     db.session.commit()
     add_to_audit_trail(person, 'edited baseline behavior')
@@ -467,6 +485,8 @@ def edit_baseline_behavior():
 def edit_triggers():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.mental_health_triggers = request.form['triggers']
     db.session.commit()
     add_to_audit_trail(person, 'edited triggers')
@@ -478,6 +498,8 @@ def edit_triggers():
 def edit_mental_health_treatment():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.mental_health_treatment_summary = request.form['mental_health_treatment_summary']
     db.session.commit()
     add_to_audit_trail(person, 'edited mental health treatment summary')
@@ -488,6 +510,8 @@ def edit_mental_health_treatment():
 def edit_medication_notes():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     person.medication_notes = request.form['medication_notes']
     db.session.commit()
     add_to_audit_trail(person, 'edited medication notes')
@@ -496,6 +520,8 @@ def edit_medication_notes():
 @app.route('/add_person', methods=['POST'])
 @login_required
 def add_person():
+    if not current_user.is_professional:
+        return jsonify({'error': True})
     print('birth date', request.form['birth_date'])
     person = Person(request.form['first_name'], request.form['middle_name'], request.form['last_name'], request.form['birth_date'])
     db.session.add(person)
@@ -509,6 +535,8 @@ def add_person():
 def add_medication():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     medications = person.medications
     if not medications:
         medications = []
@@ -524,6 +552,8 @@ def add_medication():
 def delete_medication():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     medications = person.medications
     del medications[int(request.form['index'])]
     person.medications = medications
@@ -538,6 +568,8 @@ def delete_medication():
 def delete_appointment():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     appointments = person.appointments
     del appointments[int(request.form['index'])]
     person.appointments = appointments
@@ -552,6 +584,8 @@ def delete_appointment():
 def delete_most_important_contact():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     contacts = person.most_important_contacts
     del contacts[int(request.form['index'])]
     person.most_important_contacts = contacts
@@ -565,6 +599,8 @@ def delete_most_important_contact():
 def add_most_important_contact():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     contacts = person.most_important_contacts
     if not contacts:
         contacts = []
@@ -580,6 +616,8 @@ def add_most_important_contact():
 def edit_most_important_contact():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     contacts = person.most_important_contacts
     contacts[int(request.form['index'])] = {'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes'], 'is_professional': True if request.form['is_professional'] == 'true' else False}
     person.most_important_contacts = contacts
@@ -596,6 +634,8 @@ def move_most_important_contact_upwards():
     index = int(request.form['index'])
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     contacts = person.most_important_contacts
     above_contact = contacts[index - 1]
     contact_to_move = contacts[index]
@@ -612,6 +652,8 @@ def move_most_important_contact_upwards():
 def add_appointment():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     appointments = person.appointments
     if not appointments:
         appointments = []
@@ -628,6 +670,8 @@ def add_appointment():
 def delete_contact():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     contacts = person.contacts
     del contacts[int(request.form['index'])]
     person.contacts = contacts
@@ -641,6 +685,8 @@ def delete_contact():
 def add_contact():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     contacts = person.contacts
     if not contacts:
         contacts = []
@@ -656,6 +702,8 @@ def add_contact():
 def edit_contact():
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     contacts = person.contacts
     contacts[int(request.form['index'])] = {'name': request.form['name'], 'relationship': request.form['relationship'], 'phone_number': request.form['phone_number'], 'email': request.form['email'], 'notes': request.form['notes'], 'is_professional': True if request.form['is_professional'] == 'true' else False}
     person.contacts = contacts
@@ -670,6 +718,8 @@ def move_contact_upwards():
     index = int(request.form['index'])
     person_uuid = request.form['person_uuid']
     person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
     contacts = person.contacts
     above_contact = contacts[index - 1]
     contact_to_move = contacts[index]
@@ -733,7 +783,7 @@ def home():
 @login_required
 def add_professional_domain():
     if not current_user.is_admin:
-        return
+        return jsonify({'error': True})
     domain = ApprovedWorkEmailAddressDomain(request.form['domain'])
     db.session.add(domain)
     db.session.commit()
@@ -743,7 +793,7 @@ def add_professional_domain():
 @login_required
 def add_professional_email_address():
     if not current_user.is_admin:
-        return
+        return jsonify({'error': True})
     email = ApprovedWorkEmailAddress(request.form['email'])
     db.session.add(email)
     db.session.commit()
