@@ -16,9 +16,11 @@ export APP_SETTINGS="config.StagingConfig"
 
 Run
 
+On Mac: `brew install flask`
+On Debian Linux: `sudo apt-get install flask`
+
 ```
 python3 -m pip -r requirements.py
-sudo apt-get install flask
 flask db upgrade
 source keys.sh; flask run
 ```
