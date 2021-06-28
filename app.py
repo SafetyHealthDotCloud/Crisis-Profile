@@ -660,10 +660,14 @@ def add_appointment():
     appointments.append({'date': request.form['date'], 'start_time': request.form['start_time'], 'stop_time': request.form['stop_time'], 'what': request.form['what'], 'notes': request.form['notes']})
 
     person.appointments = appointments
+    try:
+        person.appointments = sorted(appointments, key=lambda x: datetime.datetime.strptime(x['date'], '%m/%d/%Y'))
+    except Exception as e: 
+        print(e)
     flag_modified(person, "appointments")
     db.session.commit()
     add_to_audit_trail(person, 'added appointment')
-    return jsonify(appointments)
+    return jsonify(person.appointments)
 
 @app.route('/delete_contact', methods=['POST'])
 @login_required
@@ -711,6 +715,25 @@ def edit_contact():
     db.session.commit()
     add_to_audit_trail(person, 'edited contact')
     return jsonify(contacts)  
+
+@app.route('/edit_appointment', methods=['POST'])
+@login_required
+def edit_appointment():
+    person_uuid = request.form['person_uuid']
+    person = Person.query.get(person_uuid)
+    if not (current_user.email_address == person.persons_email_address or current_user.is_professional):
+        return jsonify({'error': True})
+    appointments = person.appointments
+    appointments[int(request.form['index'])] = {'date': request.form['date'], 'start_time': request.form['start_time'], 'stop_time': request.form['stop_time'], 'what': request.form['what'], 'notes': request.form['notes']}
+    person.appointments = appointments
+    try:
+        person.appointments = sorted(appointments, key=lambda x: datetime.datetime.strptime(x['date'], '%m/%d/%Y'))
+    except Exception as e: 
+        print(e)
+    flag_modified(person, "appointments")
+    db.session.commit()
+    add_to_audit_trail(person, 'edited appointment')
+    return jsonify(person.appointments) 
 
 @app.route('/move_contact_upwards', methods=['POST'])
 @login_required

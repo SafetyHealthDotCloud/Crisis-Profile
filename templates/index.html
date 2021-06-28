@@ -70,7 +70,12 @@
 		h4 {
 			font-weight: bold
 		}
-		
+		h1 a:link, h1 a:visited {
+			color:#FF69B4;
+		}
+		h1 a:hover {
+			text-decoration: none;
+		}
 		h4 {
 			font-style: italic
 		}
@@ -186,6 +191,7 @@
 							triggers: '',
 							animals: [],
 							incidents: [],
+							editAppointmentIndex: -1,
 						}
 					},
 					created: function() {
@@ -485,6 +491,21 @@
 								$('#add_most_important_contact_phone_number').val('')
 								$('#add_most_important_contact_email').val('')
 								$('#add_most_important_contact_notes').val('')
+							})
+						},
+
+						editAppointment: function(index) {
+							$.post('/edit_appointment', {
+								"person_uuid": app.person_uuid,
+								"index": index,
+								"date": $('#edit-appointment-date-' + index).val(),
+								"start_time": $('#edit-appointment-start-time-' + index).val(),
+								"stop_time": $('#edit-appointment-stop-time-' + index).val(),
+								"what": $('#edit-appointment-what-' + index).val(),
+								"notes": $('#edit-appointment-notes-' + index).val(),
+							}, function(data) {
+								app.editAppointmentIndex = -1;
+								app.appointments = data;
 							})
 						},
 						editAMostImportantContact: function(index) {
@@ -869,7 +890,7 @@
 				<br/>
 				<table>
 					<tr>
-						<th>Date</th>
+						<th>Date (MM/DD/YYYY)</th>
 						<th>Start time</th>
 						<th>Stop time</th>
 						<th>What</th>
@@ -877,12 +898,34 @@
 						<th></th>
 					</tr>
 					<tr v-for="(appointment, index) in appointments">
-						<td>[[ appointment.date ]]</td>
-						<td>[[ appointment.start_time ]]</td>
-						<td>[[ appointment.stop_time ]]</td>
-						<td>[[ appointment.what ]]</td>
-						<td>[[ appointment.notes ]]</td>
+						<td><template v-if="index == editAppointmentIndex">
+							<input type="text" v-bind:value="appointment.date" v-bind:id="'edit-appointment-date-'+index">
+						</template>
+						<template v-else>[[ appointment.date ]]</template></td>
+						<td><template v-if="index == editAppointmentIndex">
+							<input type="text" v-bind:value="appointment.start_time" v-bind:id="'edit-appointment-start-time-'+index">
+						</template>
+						<template v-else>[[ appointment.start_time ]]</template></td>
+						<td><template v-if="index == editAppointmentIndex">
+							<input type="text" v-bind:value="appointment.stop_time" v-bind:id="'edit-appointment-stop-time-'+index">
+						</template>
+						<template v-else>[[ appointment.stop_time ]]</template></td>
+						<td><template v-if="index == editAppointmentIndex">
+							<input type="text" v-bind:value="appointment.what" v-bind:id="'edit-appointment-what-'+index">
+						</template>
+						<template v-else>[[ appointment.what ]]</template></td>
+						<td><template v-if="index == editAppointmentIndex">
+							<textarea type="text" v-bind:value="appointment.notes" v-bind:id="'edit-appointment-notes-'+index">
+								</textarea>
+						</template> 
+						<template v-else>[[ appointment.notes ]]</template></td>
 						<td>
+							<template v-if="index == editAppointmentIndex">
+								<button @click="editAppointment(index)">Save</button>
+							</template>
+							<template v-else>
+								<button @click="editAppointmentIndex = index">Edit</button>
+							</template>
 							<button @click="deleteEvent(index)">X</button>
 						</td>
 					</tr>
