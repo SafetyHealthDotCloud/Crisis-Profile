@@ -678,7 +678,7 @@
                 <input type="text" v-bind:id="'edit-phone-number-'+index" v-bind:value="phone_number.phone_number"> 
                 (<strong>Phone type:</strong> <input tye="text" v-bind:id="'edit-phone-number-type-'+index" v-bind:value="phone_number.type">)
 		</span> 
-		<br/> <strong>Email address:</strong> <input type="text" id="edit-persons-email-address">
+		<br/> <strong>Email address:</strong> <input type="text" v-bind:value="persons_email_address" id="edit-persons-email-address">
 				</template>
 				<template v-else>
 					<button @click="isEditBasicInformation = true">Edit basic information</button>
