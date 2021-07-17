@@ -998,7 +998,7 @@
 								<button @click="editMostImportantContact = index">Edit</button>
 							</template>
 							<template v-if="index != 0"><button @click="moveMostImportantContactUpwards(index)">&#x2191;</button></template>
-							<button @click="deleteContact(index)">X</button>
+							<button @click="deleteMostImportantContact(index)">X</button>
 						</td>
 					</tr>
 				</table>
