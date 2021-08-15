@@ -648,54 +648,7 @@
 					<button @click="bookmarkThisPerson">Bookmark this person</button>
 				</template>
 				<br/>
-				<div>
-				<template v-if="isEditBasicInformation">
-					<button @click="editBasicInformation()">Save basic information</button>
-					<br/> <strong>First name:</strong>
-					<input type="text" id="edit-first-name" v-bind:value="first_name"> <strong>Middle name:</strong>
-					<input type="text" id="edit-middle-name" v-bind:value="middle_name"> <strong>Last name:</strong>
-					<input type="text" id="edit-last-name" v-bind:value="last_name"> <strong>Date of birth:</strong> [[ date_of_birth ]] <strong>Age:</strong> [[ age ]]
-					<br/> <strong>Preferred name:</strong>
-					<input type="text" id="edit-preferred-name" v-bind:value="preferred_name"> <strong>Preferred gender pronouns:</strong>
-					<select id="edit-preferred-gender-pronouns">
-						<option :selected="preferred_gender_pronouns == 'she/her/hers'" value="she/her/hers">she/her/hers</option>
-						<option :selected="preferred_gender_pronouns == 'they/them/their'" value="they/them/their">they/them/their</option>
-						<option :selected="preferred_gender_pronouns == 'he/him/his'" value="he/him/his">he/him/his</option>
-					</select>
-					<br/> <strong>Current physical living address:</strong>
-					<br/> <strong>Address line 1:</strong>
-					<input type="text" id="edit-current-physical-living-address-1" v-bind:value="current_physical_living_address_1">
-					<br/> <strong>Address line 2:</strong>
-					<input type="text" id="edit-current-physical-living-address-2" v-bind:value="current_physical_living_address_2">
-					<br/> <strong>City:</strong>
-					<input type="text" id="edit-current-physical-living-address-city" v-bind:value="current_physical_living_address_city">
-					<br/> <strong>State:</strong>
-					<input type="text" id="edit-current-physical-living-address-state" v-bind:value="current_physical_living_address_state">
-					<br/> <strong>Zip code:</strong>
-					<input type="text" id="edit-current-physical-living-address-zip-code" v-bind:value="current_physical_living_address_zip_code">
-					<br/>
-					<br/> <strong>Phone number(s):</strong>  <span v-for="(phone_number, index) in persons_phone_numbers">
-                <input type="text" v-bind:id="'edit-phone-number-'+index" v-bind:value="phone_number.phone_number"> 
-                (<strong>Phone type:</strong> <input tye="text" v-bind:id="'edit-phone-number-type-'+index" v-bind:value="phone_number.type">)
-		</span> 
-		<br/> <strong>Email address:</strong> <input type="text" v-bind:value="persons_email_address" id="edit-persons-email-address">
-				</template>
-				<template v-else>
-					<button @click="isEditBasicInformation = true">Edit basic information</button>
-					<br/> <strong>First name:</strong> [[ first_name ]] <strong>Middle name:</strong> [[ middle_name ]] <strong>Last name:</strong> [[ last_name ]] <strong>Date of birth:</strong> [[ date_of_birth ]] <strong>Age:</strong> [[ age ]]
-					<br/> <strong>Preferred name:</strong> [[ preferred_name ]] <strong>Preferred gender pronouns:</strong> [[ preferred_gender_pronouns ]]
-					<br/> <strong>Current physical living address:</strong>  <a target="_blank" v-bind:href="'http://maps.google.com/maps?q='+current_physical_living_address_1+' '+current_physical_living_address_2+' '+current_physical_living_address_city+' '+current_physical_living_address_state+' '+current_physical_living_address_zip_code">
-        [[ current_physical_living_address_1 ]],
-        <span v-if="current_physical_living_address_2">[[ current_physical_living_address_2 ]], </span>[[ current_physical_living_address_city ]] 
-        [[ current_physical_living_address_state ]],
-        [[ current_physical_living_address_zip_code ]]</a>
-					<br/> <strong>Phone number(s):</strong>  <span v-for="phone_number in persons_phone_numbers">
-						
-                <a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
-		</span> 
-		<br/> <strong>Email address:</strong> <a v-bind:href="'mailto:'+persons_email_address">[[ persons_email_address ]]</a>
-				</template>
-			</div>
+				
 				<div id="tocdiv">
 				<h3>Table of contents</h3>
 				<ul id="toc">
@@ -726,6 +679,54 @@
 				</ul>
 			</div>
 			<div id="main-of-profile">
+				<div>
+					<template v-if="isEditBasicInformation">
+						<button @click="editBasicInformation()">Save basic information</button>
+						<br/> <strong>First name:</strong>
+						<input type="text" id="edit-first-name" v-bind:value="first_name"> <strong>Middle name:</strong>
+						<input type="text" id="edit-middle-name" v-bind:value="middle_name"> <strong>Last name:</strong>
+						<input type="text" id="edit-last-name" v-bind:value="last_name"> <strong>Date of birth:</strong> [[ date_of_birth ]] <strong>Age:</strong> [[ age ]]
+						<br/> <strong>Preferred name:</strong>
+						<input type="text" id="edit-preferred-name" v-bind:value="preferred_name"> <strong>Preferred gender pronouns:</strong>
+						<select id="edit-preferred-gender-pronouns">
+							<option :selected="preferred_gender_pronouns == 'she/her/hers'" value="she/her/hers">she/her/hers</option>
+							<option :selected="preferred_gender_pronouns == 'they/them/their'" value="they/them/their">they/them/their</option>
+							<option :selected="preferred_gender_pronouns == 'he/him/his'" value="he/him/his">he/him/his</option>
+						</select>
+						<br/> <strong>Current physical living address:</strong>
+						<br/> <strong>Address line 1:</strong>
+						<input type="text" id="edit-current-physical-living-address-1" v-bind:value="current_physical_living_address_1">
+						<br/> <strong>Address line 2:</strong>
+						<input type="text" id="edit-current-physical-living-address-2" v-bind:value="current_physical_living_address_2">
+						<br/> <strong>City:</strong>
+						<input type="text" id="edit-current-physical-living-address-city" v-bind:value="current_physical_living_address_city">
+						<br/> <strong>State:</strong>
+						<input type="text" id="edit-current-physical-living-address-state" v-bind:value="current_physical_living_address_state">
+						<br/> <strong>Zip code:</strong>
+						<input type="text" id="edit-current-physical-living-address-zip-code" v-bind:value="current_physical_living_address_zip_code">
+						<br/>
+						<br/> <strong>Phone number(s):</strong>  <span v-for="(phone_number, index) in persons_phone_numbers">
+					<input type="text" v-bind:id="'edit-phone-number-'+index" v-bind:value="phone_number.phone_number"> 
+					(<strong>Phone type:</strong> <input tye="text" v-bind:id="'edit-phone-number-type-'+index" v-bind:value="phone_number.type">)
+			</span> 
+			<br/> <strong>Email address:</strong> <input type="text" v-bind:value="persons_email_address" id="edit-persons-email-address">
+					</template>
+					<template v-else>
+						<button @click="isEditBasicInformation = true">Edit basic information</button>
+						<br/> <strong>First name:</strong> [[ first_name ]] <strong>Middle name:</strong> [[ middle_name ]] <strong>Last name:</strong> [[ last_name ]] <strong>Date of birth:</strong> [[ date_of_birth ]] <strong>Age:</strong> [[ age ]]
+						<br/> <strong>Preferred name:</strong> [[ preferred_name ]] <strong>Preferred gender pronouns:</strong> [[ preferred_gender_pronouns ]]
+						<br/> <strong>Current physical living address:</strong>  <a target="_blank" v-bind:href="'http://maps.google.com/maps?q='+current_physical_living_address_1+' '+current_physical_living_address_2+' '+current_physical_living_address_city+' '+current_physical_living_address_state+' '+current_physical_living_address_zip_code">
+			[[ current_physical_living_address_1 ]],
+			<span v-if="current_physical_living_address_2">[[ current_physical_living_address_2 ]], </span>[[ current_physical_living_address_city ]] 
+			[[ current_physical_living_address_state ]],
+			[[ current_physical_living_address_zip_code ]]</a>
+						<br/> <strong>Phone number(s):</strong>  <span v-for="phone_number in persons_phone_numbers">
+							
+					<a v-bind:href="'tel:+1'+phone_number.phone_number">[[ phone_number.phone_number ]]</a> ([[ phone_number.type ]])
+			</span> 
+			<br/> <strong>Email address:</strong> <a v-bind:href="'mailto:'+persons_email_address">[[ persons_email_address ]]</a>
+					</template>
+				</div>
 				<h3 id="safety-information">Safety information <template v-if="isEditSafetyInformation">
         <button @click="editSafetyInformation()">Save edits</button>
       </template>
