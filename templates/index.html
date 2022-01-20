@@ -633,13 +633,15 @@
 					<button @click="login">Login</button>
 				</div>
 				<div v-else> 
-					<p>Email <a href="mailto:tim.clemans@crisisresponse.services">tim.clemans@crisisresponse.services</a> 
+					<p>Anyone with a .gov email address is automatically approved as a professional. Email <a href="mailto:tim.clemans@crisisresponse.services">tim.clemans@crisisresponse.services</a> 
 						to have your work email domain or email address added as a professional.</p>
 						<p>To gain access put in your work email address, then go to your email, copy & paste the code into the page, then click login.</p>
 					<strong>Your email (if you're a professional needing access for work then use your work email address):</strong>
 					<br/>
 					<input type="text" name="email" id="login_email" style="width:300px" v-on:keyup.enter="sendLoginEmail" />
 					<button @click="sendLoginEmail">Login</button>
+
+					<p>The source code is at <a href="https://github.com/SafetyHealthDotCloud/Crisis-Profile">https://github.com/SafetyHealthDotCloud/Crisis-Profile</a></p>
 				</div>
 			</div>
 			<div v-else-if="person_uuid">
