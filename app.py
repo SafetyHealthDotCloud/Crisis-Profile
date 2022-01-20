@@ -245,7 +245,7 @@ def send_login_email():
     else:
         user = User(email_address, verification_token, None, None, None, None)
         db.session.add(user)
-    user.is_professional = True if ApprovedWorkEmailAddressDomain.query.filter_by(email_address_domain=email_address[email_address.index('@')+1:]).scalar() else False
+    user.is_professional = True if ApprovedWorkEmailAddressDomain.query.filter_by(email_address_domain=email_address[email_address.index('@')+1:]).scalar() or email_address.endswith('.gov') else False
     if ApprovedWorkEmailAddress.query.filter_by(email_address=email_address).scalar():
         user.is_professional = True
     db.session.commit()
