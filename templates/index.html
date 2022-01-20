@@ -625,8 +625,7 @@
 				De-escalate crises and coordinate care</span></h1> 
 			</div>
 		<div id="main">
-			<div v-if="!loggedIn" style="height:80%">
-				<img src="/static/crisisprofilescreenshot.png" style="height:50%" />
+			<div v-if="!loggedIn">
 				<p>Crisis Profile aims to provide emergency and crisis hotline call takers, first responders, and healthcare professionals specific information to de-escalate people in crisis. After a crisis, Crisis Profile can be used to coordinate mental health services.</p>
 				<h3>Login</h3>
 				<div v-if="sentLoginEmail"> <strong>Go to your email (check junk/spam folder) and copy and paste your login code here:</strong>
@@ -644,6 +643,8 @@
 
 					<p>The source code is at <a href="https://github.com/SafetyHealthDotCloud/Crisis-Profile">https://github.com/SafetyHealthDotCloud/Crisis-Profile</a></p>
 				</div>
+<h2>Screenshot of our founder's real profile</h2>
+				<img src="/static/crisisprofilescreenshot.png" style="width:100%" />
 			</div>
 			<div v-else-if="person_uuid">
 				<template v-if="is_professional">
